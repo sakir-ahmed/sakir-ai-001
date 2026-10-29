@@ -12,6 +12,14 @@ sudo bash install.sh
 The installer is idempotent: re-run it any time, or run one step with
 `--step <name>`. Every step is explained at the top of `install.sh`.
 
+| Document | What it covers |
+| --- | --- |
+| [Build Blueprint](Sakir%20AI%20001%20%E2%80%94%20Build%20Blueprint.md) | The original master plan: goals, agents, budget, risks, success measures |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The system as built, with diagrams |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Why things are the way they are (and where they differ from the blueprint) |
+| [docs/OPERATIONS.md](docs/OPERATIONS.md) | Daily/weekly/monthly routines, incident playbooks, updates, full restore |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Phases and a checklist to tick off as you go |
+
 ---
 
 ## 1. Before you install (about 1 hour, mostly waiting)
@@ -83,7 +91,8 @@ sudo bash install.sh --from stack        # rebuild/restart from the stack step
    - Subscribe fields: `messages`, `messaging_postbacks`, `feed`
    - Then subscribe the Page to the app (Messenger settings → Webhooks → Add subscriptions).
 5. **Knowledge**: fill the TODOs in `/opt/sakir-ai/knowledge/`, first
-   `products/dt-restora/pricing.md`, `features.md`, `faq.md` and `me/voice.md`.
+   `products/dt-restora/pricing.md`, `features.md`, `faq.md` and `me/voice.md`,
+   then `datatech/brand.md`, `datatech/case-studies.md` and `sales/objections.md`.
    Then `sakir-ai reindex`.
    Optional: push it to a private GitHub repo to edit from your phone:
    `cd /opt/sakir-ai/knowledge && git remote add origin git@github.com:<you>/sakir-knowledge.git && git push -u origin main`

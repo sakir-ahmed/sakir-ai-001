@@ -5,7 +5,9 @@ description: Create a marketing pack for a Datatech BD product (social posts, re
 # Content pack
 
 ## 1. Load facts
-- `sakir-persona`, then `/knowledge/datatech/company.md`
+- `sakir-persona`, then `/knowledge/datatech/company.md` and `/knowledge/datatech/brand.md`
+  (tagline, colours, hashtags, approved call-to-action lines, links)
+- `/knowledge/datatech/case-studies.md` for customer stories (only clients marked public)
 - `/knowledge/products/dt-<product>/features.md`, `pricing.md`, `faq.md`
 - Optional: `python3 /opt/sakir-tools/sakir.py kb search <product> "<topic>"`
 

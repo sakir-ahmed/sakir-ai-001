@@ -7,9 +7,9 @@ directly (on the server or on GitHub from your phone), then run
 | Folder | Used by | Notes |
 | --- | --- | --- |
 | `me/` | all writing agents, career, branding | who Sakir is, voice, likes/dislikes, goals |
-| `datatech/` | sales, content | company facts, contact, payment methods |
+| `datatech/` | sales, content | `company.md` facts and contact, `brand.md` marketing identity, `case-studies.md` public results |
 | `products/<product>/` | sales, content | one folder per product; `dt-restora` first |
-| `sales/` | sales pipeline | reply and classifier prompts, FAQ templates, playbook, Banglish glossary |
+| `sales/` | sales pipeline | reply and classifier prompts, FAQ templates, playbook, objections, Banglish glossary |
 | `servers/` | DevOps agent | what runs where and what "healthy" means |
 | `career/` | career agent | master CV with every achievement |
 | `inbox/` | you | `/remember` notes from Hermes; move them into the right file |

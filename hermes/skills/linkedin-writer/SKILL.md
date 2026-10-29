@@ -6,6 +6,7 @@ description: Draft LinkedIn posts in Sakir's voice from his real work and learni
 
 ## Inputs
 - `sakir-persona` and `/knowledge/me/voice.md` (copy his style from the examples)
+- `/knowledge/datatech/case-studies.md` for real product results (public clients only)
 - `/knowledge/me/goals.md` (brand: software architecture, microservices, leading teams, building products)
 - Recent material: ask Sakir "What did you ship, learn or decide this week?" if nothing is in
   `/knowledge/inbox/` from the last 7 days.

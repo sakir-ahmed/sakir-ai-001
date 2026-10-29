@@ -1,0 +1,159 @@
+# Operations guide
+
+How to run Sakir AI 001 after it is installed: routines, incident playbooks,
+updates and restores. Commands assume you are logged in as `sakir` on the server.
+
+## Routines
+
+### Daily (5 minutes)
+- Read the 08:30 morning brief and the 21:30 evening summary on @SakirAI_bot.
+- Clear @DTSalesDesk_bot: approve, edit or reject every draft (they expire after 24 hours).
+- Act on any alert (site down, angry customer, spend warning, approval code).
+
+### Weekly (Friday, 30 minutes)
+- [ ] Review 20 customer replies: `/stats` in @DTSalesDesk_bot, then scroll the sent cards.
+      Note the edit rate (target: under 20%).
+- [ ] Fix what the edits show: add facts to `knowledge/`, add FAQ templates, tune `sales/prompt.md`.
+- [ ] `sakir-ai reindex` if knowledge changed.
+- [ ] Check spend: ask Hermes "how much did AI cost this month?".
+- [ ] Review next week's content calendar: ask Hermes "content calendar for 7 days".
+- [ ] Move `/remember` notes from `knowledge/inbox/` into the right files.
+
+### Monthly (first Sunday, 1 hour)
+- [ ] Restore test on your laptop (see "Restore" below). Record the result in [ROADMAP.md](ROADMAP.md).
+- [ ] `sakir-ai update` (it backs up first). Read release notes for Hermes and n8n before.
+- [ ] `sakir-ai health` → everything PASS.
+- [ ] Disk: `df -h /` under 70%; `sudo ncdu /opt/sakir-ai/data` if not.
+- [ ] Check OpenRouter prices for the three models in `config/dt-assistant.yaml`.
+- [ ] Decide on autonomy changes (below).
+
+### Every 6 months
+- [ ] Rotate keys with [`scripts/rotate-keys.md`](../scripts/rotate-keys.md).
+- [ ] Check the Meta Graph API version in `config/dt-assistant.yaml` is still supported.
+- [ ] Remove unused Telegram sessions and Tailscale devices.
+
+## Raising autonomy
+
+Move one step at a time, only after two weeks with an edit rate under 20% for that intent.
+
+| Step | Change in `config/dt-assistant.yaml` | Effect |
+| --- | --- | --- |
+| 0 (start) | `auto_intents: []`, `auto_send_templates: false` | Everything is a draft |
+| 1 | `auto_send_templates: true` | Saved FAQ answers go out automatically |
+| 2 | `auto_intents: [faq]` | AI-written FAQ answers go out when confidence ≥ 0.85 |
+| 3 | `auto_intents: [faq, demo, greeting]` | Demo requests answered automatically |
+
+Never add `price`, `discount`, `order`, `complaint` or `legal`: they are in `never_auto`
+and stay with you. After each change: `sakir-ai restart dt-assistant`.
+
+## Incident playbooks
+
+### Customers are not getting replies
+1. `sakir-ai health` — is dt-assistant running and healthy?
+2. `sakir-ai logs dt-assistant` — look for `bad signature`, `Graph`, `OpenRouter`, `budget`.
+3. `curl -s -o /dev/null -w '%{http_code}\n' https://<domain>/meta/webhook` → should print `403`.
+   `000` = DNS/TLS/Nginx problem: `sudo nginx -t`, `sudo systemctl status nginx`.
+4. Meta → App → Webhooks: subscription active, Page subscribed, no delivery errors.
+5. Page token expired? Generate a new long-lived token, then
+   `sudo bash /opt/sakir-ai/install.sh --step secrets && sakir-ai restart dt-assistant`.
+6. While fixing: `sakir-ai pause` sends holding replies so nobody is ignored.
+
+### A wrong reply went to a customer
+1. `sakir-ai pause` (or `/pause` in @DTSalesDesk_bot).
+2. Reply to the customer personally from Meta Business Suite.
+3. Find the cause: missing fact (add to knowledge), bad template, or the intent was automatic
+   (remove it from `auto_intents`).
+4. Add the message to your test set, then `sakir-ai resume`.
+
+### Spend is climbing fast
+1. Ask Hermes "how much did AI cost this month?" — which purpose is high?
+2. Spam or loops: check `sakir-ai logs dt-assistant` for repeated leads; block the user on the Page.
+3. Lower `budget.monthly_usd` or switch `models.reply.id` to a cheaper model; restart dt-assistant.
+4. OpenRouter key limits are the hard stop; check them at openrouter.ai.
+
+### Hermes does not answer
+1. `sakir-ai logs hermes`.
+2. `TELEGRAM_ALLOWED_USERS` in `/opt/sakir-ai/data/hermes/.env` must be your numeric ID.
+3. OpenRouter key valid and has credit?
+4. `sakir-ai restart hermes`.
+
+### Server is slow or a container keeps restarting
+1. `sakir-ai status` — which container uses the CPU/RAM?
+2. stt is the usual peak (transcribing long audio); it is capped at 2 vCPU.
+3. Memory kills: `sudo dmesg -T | grep -i oom`. Raise that service's `mem_limit` in
+   `compose.yml` only if the server has room, then `sakir-ai start`.
+
+### Disk almost full
+1. `sudo ncdu /opt/sakir-ai` — usually `backups/`, `data/loki`, or Docker images.
+2. `docker image prune -f`; old backups: lower `KEEP_DAYS` in `scripts/backup.sh`.
+3. Loki keeps 30 days; lower `retention_period` in `config/loki.yaml` if needed.
+
+### Suspected leak or break-in
+1. `sakir-ai pause` and `sakir-ai stop hermes`.
+2. Rotate every key in [`scripts/rotate-keys.md`](../scripts/rotate-keys.md), Telegram tokens first.
+3. Check `/var/log/auth.log`, `sudo fail2ban-client status sshd`,
+   `/opt/sakir-ai/data/safe-exec-audit/actions.log`.
+4. If unsure, rebuild: fresh server + restore (below).
+
+## Updating
+
+```bash
+sakir-ai update        # backup → pull images → rebuild our services → restart → reinstall skills
+sakir-ai health
+```
+
+Pin versions after a good update so the next one is deliberate:
+```bash
+sakir-ai versions      # shows the images in use
+sudo nano /opt/sakir-ai/.env    # e.g. N8N_IMAGE=n8nio/n8n:<version>
+```
+
+Rollback: set the previous tag in `.env`, then `sakir-ai start`.
+
+Updating the installer code itself:
+```bash
+cd ~/sakir-ai-001 && git pull
+sudo bash install.sh --step layout     # copies new code to /opt/sakir-ai (never touches data or secrets)
+sudo bash install.sh --step stack      # rebuilds and restarts
+```
+
+## Restore
+
+### Test (monthly, on your laptop)
+```bash
+scripts/restore-test.sh sakir-ai_<date>_0300.tar.age ~/keys/sakir-backup.key
+```
+It decrypts, loads ai-db into a throwaway Postgres and prints row counts.
+
+### Full restore onto a new server
+1. Install the bundle on the new server: `sudo bash install.sh` (same domain; it creates fresh secrets —
+   these are replaced in step 4).
+2. Stop everything: `sakir-ai stop`.
+3. Copy the backup and your private key to the server, then:
+   ```bash
+   mkdir -p /root/restore && cd /root/restore
+   age -d -i sakir-backup.key sakir-ai_<date>.tar.age | tar -xf -
+   tar -xzf files.tgz -C /opt/sakir-ai        # config, secrets, .env, knowledge, data/hermes, kuma, grafana
+   ```
+4. Load the databases (the restored secrets now match the dumps):
+   ```bash
+   cd /opt/sakir-ai
+   sudo rm -rf data/ai-db data/n8n-db          # empty databases from step 1
+   docker compose up -d ai-db n8n-db && sleep 15
+   gunzip -c /root/restore/ai-db.sql.gz  | docker compose exec -T ai-db  psql -U sakirai -d postgres
+   gunzip -c /root/restore/n8n-db.sql.gz | docker compose exec -T n8n-db psql -U n8n -d postgres
+   ```
+   Messages that a role or database "already exists" are expected; the tables and rows still load.
+5. `sakir-ai start && sakir-ai reindex && sakir-ai health`.
+6. Point DNS to the new server if the IP changed, then `sudo bash install.sh --step tls`.
+
+## Where to look
+
+| Question | Place |
+| --- | --- |
+| What did agents do on the server? | `/opt/sakir-ai/data/safe-exec-audit/actions.log` |
+| What did the installer do? | `/var/log/sakir-ai-install.log` |
+| Host actions (reboot, nginx, ssl) | `/var/log/sakir-hostops.log` |
+| Backup runs | `/var/log/sakir-ai-backup.log`, `journalctl -u sakir-backup` |
+| Container logs (30 days) | Grafana → Explore → Loki → `{container="dt-assistant"}` |
+| Sales data | ai-db tables `leads`, `messages`, `approvals`, `content_calendar`, `spend`, `metrics` |
