@@ -1,0 +1,74 @@
+# =============================================================================
+# dt-assistant settings — sales replies, approvals, follow-ups, publishing.
+# After editing: sakir-ai restart dt-assistant
+# =============================================================================
+
+assistant_name: "Datatech BD Assistant"
+company: "Datatech BD Ltd."
+product: restora                    # default product for new leads
+qdrant_collection: restora          # knowledge collection used for answers
+
+# ---- Models (OpenRouter model IDs) and prices in USD per 1M tokens ----
+# Prices are used only when OpenRouter does not report the exact cost.
+models:
+  classify:
+    id: google/gemini-2.5-flash-lite
+    price_in: 0.10
+    price_out: 0.40
+  reply:
+    id: deepseek/deepseek-v3.2
+    price_in: 0.27
+    price_out: 0.40
+  reply_premium:                    # leads at proposal stage, complaints
+    id: google/gemini-2.5-flash
+    price_in: 0.30
+    price_out: 2.50
+
+# ---- Budget guard ----
+budget:
+  monthly_usd: 26                   # matches the OpenRouter 'sales' key limit
+  alert_at_percent: 70              # Telegram warning to Sakir
+  # When the month's spend reaches the limit, no model is called: every new
+  # message gets a polite holding reply and an approval card for Sakir.
+
+# ---- Autonomy ----
+autonomy:
+  # Intents allowed to send WITHOUT approval. Start empty (everything is a
+  # draft). After two clean weeks, add e.g. [faq, demo] — never price.
+  auto_intents: []
+  min_confidence: 0.85
+  # Intents that can never be sent automatically, whatever is listed above.
+  never_auto: [price, discount, complaint, order, legal, other]
+  # Saved templates (knowledge/sales/templates.yaml) may be sent automatically
+  # for the FAQ intent. Set false to send templates as drafts too.
+  auto_send_templates: false
+
+# ---- Meta rules ----
+meta:
+  graph_version: v25.0          # check yearly; Meta retires versions after ~2 years
+  messenger_window_hours: 24        # Meta's standard messaging window
+  draft_stale_hours: 23             # warn on drafts this old (window closing)
+  comment_reply: public             # public reply under the comment
+  hide_spam_comments: true
+
+# ---- Follow-ups (inside the 24-hour window only) ----
+followup:
+  enabled: true
+  check_every_minutes: 30
+  after_silence_hours: 20           # lead went quiet this long after our reply
+  stages: [interested, demo]        # only warm leads
+
+# ---- Publisher ----
+publisher:
+  check_every_seconds: 60
+  auto_platforms: [facebook, instagram]
+  # Everything else (youtube, linkedin, tiktok, x) gets a ready-to-paste reminder.
+
+# ---- Pause / holding replies ----
+holding_reply:
+  bn: "ধন্যবাদ! আমাদের টিম খুব শীঘ্রই আপনাকে উত্তর দেবে।"
+  banglish: "Dhonnobad! Amader team khub shighroi apnake reply dibe."
+  en: "Thank you! Our team will reply to you very shortly."
+
+# ---- Schedules (Asia/Dhaka) ----
+daily_metrics_time: "21:00"

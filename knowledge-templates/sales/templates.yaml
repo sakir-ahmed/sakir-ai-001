@@ -1,0 +1,39 @@
+# =============================================================================
+# Saved FAQ answers. The classifier picks a key when one fully answers a
+# message. Each answer has bn (Bangla script), banglish and en versions.
+#
+# - {assistant_name} is filled in automatically.
+# - Any template containing "TODO" is ignored until you complete it.
+# - Templates are sent as drafts unless autonomy.auto_send_templates is true
+#   in config/dt-assistant.yaml.
+# =============================================================================
+
+mobile_app:
+  question: "Is there a mobile app?"
+  bn: "জি, DT Restora-র ওয়েব অ্যাপ্লিকেশন এবং মোবাইল অ্যাপ দুটোই আছে। আপনি কি একটি ফ্রি ডেমো দেখতে চান?"
+  banglish: "Ji, DT Restora-r web application ar mobile app duitai ache. Apni ki ekta free demo dekhte chan?"
+  en: "Yes, DT Restora has both a web application and a mobile app. Would you like a free demo?"
+
+demo:
+  question: "Can I see a demo?"
+  bn: "অবশ্যই! ডেমো সম্পূর্ণ ফ্রি। আপনার নাম, রেস্টুরেন্টের নাম আর ফোন নম্বর দিন, আমাদের টিম যোগাযোগ করে সময় ঠিক করবে।"
+  banglish: "Obosshoi! Demo shompurno free. Apnar naam, restaurant er naam ar phone number din, amader team jogajog kore shomoy thik korbe."
+  en: "Of course! The demo is completely free. Please share your name, restaurant name and phone number, and our team will contact you to set a time."
+
+what_is_restora:
+  question: "What is DT Restora?"
+  bn: "DT Restora হলো Datatech BD Ltd.-এর রেস্টুরেন্ট ম্যানেজমেন্ট সফটওয়্যার, ওয়েব ও মোবাইল অ্যাপসহ। আপনার রেস্টুরেন্টের ধরন জানালে আমরা কোন প্যাকেজ উপযোগী তা জানাতে পারব।"
+  banglish: "DT Restora holo Datatech BD Ltd.-er restaurant management software, web o mobile app shoho. Apnar restaurant er dhoron janale amra kon package upojogi ta janate parbo."
+  en: "DT Restora is Datatech BD Ltd.'s restaurant management software, with a web and mobile app. Tell us a little about your restaurant and we will suggest the right package."
+
+talk_to_human:
+  question: "Can I talk to a person / are you a bot?"
+  bn: "আমি Datatech BD-র সহকারী। Sakir ভাই নিজে আপনার সাথে কথা বলবেন। আপনার ফোন নম্বরটি দিলে উনি কল করবেন।"
+  banglish: "Ami Datatech BD-r assistant. Sakir bhai nije apnar shathe kotha bolben. Apnar phone number ta dile uni call korben."
+  en: "I'm the Datatech BD assistant. Sakir will talk to you personally; share your phone number and he will call you."
+
+office_hours:
+  question: "When are you open / support hours?"
+  bn: "TODO"
+  banglish: "TODO"
+  en: "TODO"

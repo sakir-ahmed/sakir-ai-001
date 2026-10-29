@@ -1,0 +1,10 @@
+# Sakir AI 001 — re-index the knowledge base every night at 02:30.
+[Unit]
+Description=Nightly knowledge re-index at 02:30
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

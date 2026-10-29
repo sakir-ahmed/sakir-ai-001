@@ -1,0 +1,11 @@
+# Sakir AI 001 — run the backup every night at 03:00 server time (Asia/Dhaka).
+[Unit]
+Description=Nightly Sakir AI backup at 03:00
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target

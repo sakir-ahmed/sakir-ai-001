@@ -1,0 +1,11 @@
+# Sakir AI 001 — nightly encrypted backup (triggered by sakir-backup.timer).
+[Unit]
+Description=Sakir AI encrypted backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/sakir-ai/scripts/backup.sh
+Nice=10
+IOSchedulingClass=idle

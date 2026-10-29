@@ -1,0 +1,69 @@
+# =============================================================================
+# Sakir AI 001 — public entry point (host Nginx)
+#
+# Rendered by `install.sh --step nginx` into /etc/nginx/sites-available/.
+# __DOMAIN__ and __INSTALL_DIR__ are replaced at install time.
+# `install.sh --step tls` (certbot --nginx) adds the HTTPS server block and
+# the HTTP->HTTPS redirect to this file automatically.
+#
+# Only three paths are public; everything else returns 404:
+#   /meta/webhook      Facebook/Instagram webhooks  -> dt-assistant
+#   /hooks/<path>      n8n production webhooks      -> n8n /webhook/<path>
+#   /public-media/     images Instagram must fetch  -> outbox/public (read-only)
+#
+# When DT products move to this server, give each its own server block in
+# a separate file; do not add them here.
+# =============================================================================
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name __DOMAIN__;
+
+    # Basic hardening headers.
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy no-referrer always;
+
+    client_max_body_size 5m;    # Meta payloads are small; media is fetched, not uploaded
+
+    # ---- Meta webhook (verification GET + event POST) ----
+    location = /meta/webhook {
+        limit_req zone=sakir_webhook burst=50 nodelay;
+        proxy_pass http://127.0.0.1:8081/meta/webhook;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 15s;
+    }
+
+    # ---- n8n production webhooks only (the editor is never public) ----
+    location /hooks/ {
+        limit_req zone=sakir_webhook burst=20 nodelay;
+        proxy_pass http://127.0.0.1:5678/webhook/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # ---- Public media for Instagram publishing (random file names) ----
+    location /public-media/ {
+        alias __INSTALL_DIR__/outbox/public/;
+        autoindex off;
+        limit_except GET HEAD { deny all; }
+        add_header Cache-Control "public, max-age=86400";
+    }
+
+    # ---- Let's Encrypt HTTP challenge (used by certbot) ----
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    # ---- Everything else ----
+    location / {
+        return 404;
+    }
+}

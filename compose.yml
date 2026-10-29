@@ -1,0 +1,319 @@
+# =============================================================================
+# Sakir AI 001 — all services on one host
+#
+# Networks
+#   ai   : Hermes, dt-assistant, n8n, databases, speech, search, safe-exec
+#   ops  : monitoring (Loki, Alloy, Grafana, Uptime Kuma) + safe-exec
+#   Future DT production apps get their OWN network; nothing here joins it.
+#
+# Exposure
+#   Every published port is bound to 127.0.0.1. The host Nginx is the only
+#   public entry point (see config/nginx/). Admin UIs are reached over
+#   Tailscale or an SSH tunnel.
+#
+# Docker socket
+#   Only safe-exec (restarts, logs) and alloy (log shipping, read-only)
+#   mount it. Hermes, n8n and dt-assistant never do.
+#
+# Resource caps total about 9 vCPU / 22 GB, leaving room for DT products.
+# Image tags come from .env (seeded from versions.env).
+# =============================================================================
+name: sakir-ai
+
+# Settings shared by every service.
+x-common: &common
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  environment:
+    TZ: ${TZ:-Asia/Dhaka}
+  logging:
+    driver: json-file
+    options: { max-size: "20m", max-file: "5" }
+
+services:
+  # ---------------------------------------------------------------------------
+  # Hermes Agent: Sakir's private assistant on Telegram (@SakirAI_bot)
+  # State (config.yaml, .env, skills, memory, sessions) lives in data/hermes.
+  # ---------------------------------------------------------------------------
+  hermes:
+    <<: *common
+    image: ${HERMES_IMAGE:-nousresearch/hermes-agent:latest}
+    container_name: hermes
+    command: ["gateway", "run"]
+    env_file: [./secrets/hermes.env]
+    environment:
+      TZ: ${TZ:-Asia/Dhaka}
+      # Run as uid/gid 10001 (same as our services) so Hermes can write to
+      # outbox/ and knowledge/inbox; the image fixes /opt/data ownership itself.
+      HERMES_UID: "10001"
+      HERMES_GID: "10001"
+    volumes:
+      - ./data/hermes:/opt/data
+      - ./knowledge:/knowledge:ro              # source of truth, read-only
+      - ./knowledge/inbox:/knowledge/inbox     # /remember notes land here
+      - ./outbox:/outbox                       # PDFs, images, CVs it produces
+      - ./tools:/opt/sakir-tools:ro            # sakir.py helper used by skills
+    shm_size: 1g                               # headless browser needs it
+    networks: [ai]
+    cpus: 1.5
+    mem_limit: 3g
+    depends_on:
+      safe-exec: { condition: service_healthy }
+      dt-assistant: { condition: service_started }
+
+  # ---------------------------------------------------------------------------
+  # dt-assistant: Facebook/Instagram sales pipeline, approval bot
+  # (@DTSalesDesk_bot), content publisher, lead follow-ups, internal API.
+  # ---------------------------------------------------------------------------
+  dt-assistant:
+    <<: *common
+    build: ./services/dt-assistant
+    image: sakir-ai/dt-assistant:local
+    container_name: dt-assistant
+    env_file: [./secrets/dt-assistant.env]
+    volumes:
+      - ./config/dt-assistant.yaml:/config/dt-assistant.yaml:ro
+      - ./knowledge:/knowledge:ro
+      - ./outbox:/outbox
+    ports: ["127.0.0.1:8081:8080"]             # Nginx -> /meta/webhook
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [ai]
+    cpus: 1
+    mem_limit: 768m
+    depends_on:
+      ai-db: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # ai-db: Postgres for leads, messages, approvals, content calendar, spend.
+  # Schema is applied by dt-assistant on start (idempotent). The init script
+  # only creates the read-only role Hermes uses for briefs.
+  # ---------------------------------------------------------------------------
+  ai-db:
+    <<: *common
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: ai-db
+    env_file: [./secrets/ai-db.env]
+    volumes:
+      - ./data/ai-db:/var/lib/postgresql/data
+      - ./db/ai-db-init:/docker-entrypoint-initdb.d:ro
+    networks: [ai]
+    cpus: 1
+    mem_limit: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # n8n: no-code workflows for anything new you want to automate.
+  # Editor on 127.0.0.1:5678 (Tailscale / SSH tunnel). Public webhooks are
+  # exposed by Nginx at https://<domain>/hooks/<path> -> /webhook/<path>.
+  # ---------------------------------------------------------------------------
+  n8n:
+    <<: *common
+    image: ${N8N_IMAGE:-n8nio/n8n:latest}
+    container_name: n8n
+    env_file: [./secrets/n8n.env]
+    environment:
+      TZ: ${TZ:-Asia/Dhaka}
+      GENERIC_TIMEZONE: ${TZ:-Asia/Dhaka}
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8n-db
+      DB_POSTGRESDB_PORT: "5432"
+      N8N_HOST: ${PUBLIC_DOMAIN:-localhost}
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://${PUBLIC_DOMAIN:-localhost}/hooks/
+      N8N_ENDPOINT_WEBHOOK: webhook
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_RUNNERS_ENABLED: "true"
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+      - ./outbox:/outbox
+    ports: ["127.0.0.1:5678:5678"]
+    networks: [ai]
+    cpus: 1
+    mem_limit: 2g
+    depends_on:
+      n8n-db: { condition: service_healthy }
+
+  n8n-db:
+    <<: *common
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: n8n-db
+    env_file: [./secrets/n8n-db.env]
+    volumes: ["./data/n8n-db:/var/lib/postgresql/data"]
+    networks: [ai]
+    cpus: 0.5
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # qdrant: vector search over the knowledge base (filled by `indexer`).
+  # ---------------------------------------------------------------------------
+  qdrant:
+    <<: *common
+    image: ${QDRANT_IMAGE:-qdrant/qdrant:latest}
+    container_name: qdrant
+    volumes: ["./data/qdrant:/qdrant/storage"]
+    environment:
+      TZ: ${TZ:-Asia/Dhaka}
+      QDRANT__TELEMETRY_DISABLED: "true"
+    networks: [ai]
+    cpus: 0.5
+    mem_limit: 2g
+
+  # ---------------------------------------------------------------------------
+  # stt: Bangla + English speech-to-text and multilingual embeddings (CPU).
+  # Models download to data/models on first start.
+  # ---------------------------------------------------------------------------
+  stt:
+    <<: *common
+    build: ./services/stt
+    image: sakir-ai/stt:local
+    container_name: stt
+    environment:
+      TZ: ${TZ:-Asia/Dhaka}
+      STT_BN_MODEL: small          # small (~1 GB) or large (~3 GB, more accurate)
+      STT_WHISPER_MODEL: small     # language detection + English
+      STT_THREADS: "4"
+    volumes: ["./data/models:/models"]
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [ai]
+    cpus: 2
+    mem_limit: 5g
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15m            # first model download and conversion
+
+  # ---------------------------------------------------------------------------
+  # tts: text-to-speech for spoken replies (Bangla and English voices).
+  # ---------------------------------------------------------------------------
+  tts:
+    <<: *common
+    build: ./services/tts
+    image: sakir-ai/tts:local
+    container_name: tts
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [ai]
+    cpus: 0.25
+    mem_limit: 256m
+
+  # ---------------------------------------------------------------------------
+  # safe-exec: the ONLY way agents act on the server. Named actions from
+  # allowlist.yaml; risky ones need a code sent to Sakir's Telegram.
+  # ---------------------------------------------------------------------------
+  safe-exec:
+    <<: *common
+    build: ./services/safe-exec
+    image: sakir-ai/safe-exec:local
+    container_name: safe-exec
+    env_file: [./secrets/safe-exec.env]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/allowlist.yaml:/app/allowlist.yaml:ro
+      - ./hostops/queue:/hostops/queue
+      - ./hostops/done:/hostops/done:ro
+      - ./backups:/backups:ro
+      - ./data/safe-exec-audit:/app/audit
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [ai, ops]
+    cpus: 0.25
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # indexer: one-shot job that loads knowledge/ into Qdrant.
+  # Runs from the sakir-index timer (02:30) or `sakir-ai reindex`.
+  # ---------------------------------------------------------------------------
+  indexer:
+    build: ./services/indexer
+    image: sakir-ai/indexer:local
+    container_name: indexer
+    volumes: ["./knowledge:/knowledge:ro"]
+    networks: [ai]
+    profiles: ["jobs"]
+    security_opt: ["no-new-privileges:true"]
+
+  # ---------------------------------------------------------------------------
+  # Monitoring
+  # ---------------------------------------------------------------------------
+  uptime-kuma:
+    <<: *common
+    image: ${UPTIME_KUMA_IMAGE:-louislam/uptime-kuma:1}
+    container_name: uptime-kuma
+    volumes: ["./data/kuma:/app/data"]
+    ports: ["127.0.0.1:3001:3001"]
+    networks: [ops]
+    cpus: 0.25
+    mem_limit: 384m
+
+  loki:
+    <<: *common
+    image: ${LOKI_IMAGE:-grafana/loki:3.4.2}
+    container_name: loki
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./config/loki.yaml:/etc/loki/loki.yaml:ro
+      - ./data/loki:/loki
+    networks: [ops]
+    cpus: 0.5
+    mem_limit: 1g
+
+  alloy:
+    <<: *common
+    image: ${ALLOY_IMAGE:-grafana/alloy:latest}
+    container_name: alloy
+    command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy/data"]
+    volumes:
+      - ./config/alloy.config:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/host/var/log:ro
+    networks: [ops]
+    cpus: 0.25
+    mem_limit: 512m
+    depends_on: [loki]
+
+  grafana:
+    <<: *common
+    image: ${GRAFANA_IMAGE:-grafana/grafana:latest}
+    container_name: grafana
+    env_file: [./secrets/grafana.env]
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports: ["127.0.0.1:3000:3000"]
+    networks: [ops]
+    cpus: 0.25
+    mem_limit: 512m
+    depends_on: [loki]
+
+networks:
+  ai:
+    name: sakir-ai_ai
+  ops:
+    name: sakir-ai_ops

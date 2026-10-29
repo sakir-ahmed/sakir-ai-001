@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# =============================================================================
+# sakir-hostops — runs queued, allowlisted HOST actions for safe-exec.
+#
+# Installed to /usr/local/bin/sakir-hostops (root, mode 750) and triggered by
+# sakir-hostops.path whenever safe-exec drops a job file into the queue.
+#
+# Job file  (queue/<id>.json): {"id": "a1b2c3d4", "action": "nginx_reload"}
+# Result    (done/<id>.json):  {"id": "...", "action": "...", "ok": true, "out": "...", "finished": "..."}
+#
+# Security model:
+#   - safe-exec has already checked the allowlist, the tier and, for risky
+#     actions, Sakir's approval code. This script checks the action name AGAIN
+#     against its own fixed list and ignores anything else.
+#   - The job file carries no arguments, so nothing from an agent can reach a
+#     shell command line.
+# =============================================================================
+set -uo pipefail
+
+INSTALL_DIR="${INSTALL_DIR:-/opt/sakir-ai}"
+QUEUE="${INSTALL_DIR}/hostops/queue"
+DONE="${INSTALL_DIR}/hostops/done"
+LOG="/var/log/sakir-hostops.log"
+
+log() { printf '%s %s\n' "$(date -Is)" "$*" >> "$LOG"; }
+
+# write_result ID ACTION OK OUTPUT
+write_result() {
+  jq -n --arg id "$1" --arg action "$2" --argjson ok "$3" --arg out "$4" \
+        --arg finished "$(date -Is)" \
+        '{id:$id, action:$action, ok:$ok, out:$out, finished:$finished}' \
+        > "${DONE}/$1.json.tmp" && mv "${DONE}/$1.json.tmp" "${DONE}/$1.json"
+  chmod 644 "${DONE}/$1.json"
+}
+
+shopt -s nullglob
+for job in "${QUEUE}"/*.json; do
+  id="$(jq -r '.id // empty' "$job" 2>/dev/null)"
+  action="$(jq -r '.action // empty' "$job" 2>/dev/null)"
+  rm -f "$job"
+
+  # Job ids are 8 hex characters; anything else is ignored.
+  if [[ ! "$id" =~ ^[a-f0-9]{8}$ ]]; then
+    log "ignored malformed job ${job##*/}"
+    continue
+  fi
+  log "job ${id}: ${action}"
+
+  case "$action" in
+    disk_usage)
+      out="$(df -h -x tmpfs -x overlay; echo; free -h)"; rc=0 ;;
+    ssl_expiry)
+      out="$(certbot certificates 2>&1)"; rc=$? ;;
+    nginx_test)
+      out="$(nginx -t 2>&1)"; rc=$? ;;
+    nginx_reload)
+      out="$(nginx -t 2>&1 && systemctl reload nginx 2>&1 && echo 'nginx reloaded')"; rc=$? ;;
+    ssl_renew)
+      out="$(certbot renew --no-random-sleep-on-renew 2>&1 | tail -n 15)"; rc=${PIPESTATUS[0]} ;;
+    reboot)
+      write_result "$id" "$action" true "rebooting now"
+      log "rebooting by approved request ${id}"
+      sync; systemctl reboot; exit 0 ;;
+    poweroff)
+      write_result "$id" "$action" true "powering off now"
+      log "power off by approved request ${id}"
+      sync; systemctl poweroff; exit 0 ;;
+    *)
+      out="refused: '${action}' is not a host action"; rc=1 ;;
+  esac
+
+  if [[ $rc -eq 0 ]]; then ok=true; else ok=false; fi
+  # Keep results short; agents only need the summary.
+  write_result "$id" "$action" "$ok" "$(printf '%s' "$out" | tail -c 6000)"
+done
+
+# Results older than a day are no longer useful.
+find "$DONE" -name '*.json' -mmin +1440 -delete 2>/dev/null || true

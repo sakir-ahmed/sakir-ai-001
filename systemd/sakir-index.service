@@ -1,0 +1,10 @@
+# Sakir AI 001 — pull knowledge changes and rebuild the search index.
+[Unit]
+Description=Sakir AI knowledge re-index
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/sakir-ai/scripts/sakir-ai.sh reindex
+Nice=10

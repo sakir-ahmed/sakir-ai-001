@@ -1,0 +1,24 @@
+# Sakir AI 001 — never commit secrets, runtime data or build leftovers.
+# (install.sh copies this bundle to /opt/sakir-ai; these paths exist only there,
+#  but are ignored here too in case the installer is run from a clone.)
+.env
+secrets/
+data/
+backups/
+outbox/
+knowledge/
+hostops/queue/
+hostops/done/
+.state/
+*.age
+*.key
+
+# Python / editors
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.DS_Store
+.idea/
+.vscode/

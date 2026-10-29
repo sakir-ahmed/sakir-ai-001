@@ -1,0 +1,12 @@
+# Sakir AI 001 — run queued, allowlisted host actions (see /usr/local/bin/sakir-hostops).
+[Unit]
+Description=Sakir AI host action runner
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/sakir-hostops
+# Light sandboxing: the runner needs root for nginx/certbot/reboot only.
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectHome=true

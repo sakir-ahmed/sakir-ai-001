@@ -1,0 +1,10 @@
+# Sakir AI 001 — start sakir-hostops when safe-exec queues a host action.
+[Unit]
+Description=Watch the Sakir AI host-action queue
+
+[Path]
+PathExistsGlob=/opt/sakir-ai/hostops/queue/*.json
+Unit=sakir-hostops.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,75 @@
+# =============================================================================
+# safe-exec allowlist — the complete list of things agents may do on the server.
+#
+# tiers:
+#   read   runs immediately, result returned to the agent
+#   safe   runs immediately, Sakir gets a "Done" message on Telegram
+#   risky  needs a 4-digit code sent to Sakir's Telegram (/confirm <id> <code>)
+# Any action not listed under `tiers` is refused and logged.
+#
+# After editing: sakir-ai restart safe-exec
+# =============================================================================
+tiers:
+  containers_status: read     # name, state, health of every container
+  container_logs: read        # last N lines (max 500) of an allowed container
+  error_summary: read         # error counts per container from Loki, last hour
+  disk_usage: read            # df + free on the host
+  ssl_expiry: read            # certbot certificates
+  nginx_test: read            # nginx -t
+  restart_container: safe     # restart one container from `restartable`
+  nginx_reload: safe          # nginx -t && reload
+  ssl_renew: safe             # certbot renew
+  remove_container: risky     # only names in `removable`
+  prune_images: risky         # dangling images only
+  reboot: risky               # needs a backup from the last 24 hours
+  poweroff: risky             # needs a backup from the last 24 hours
+
+# Containers whose logs agents may read.
+containers:
+  - hermes
+  - dt-assistant
+  - n8n
+  - stt
+  - tts
+  - qdrant
+  - ai-db
+  - n8n-db
+  - safe-exec
+  - uptime-kuma
+  - loki
+  - grafana
+  # Add DT product containers here when they run on this server, e.g.:
+  # - dt-restora-api
+  # - dt-restora-web
+
+# Containers agents may restart without asking (act-and-report).
+# Databases are deliberately NOT here.
+restartable:
+  - dt-assistant
+  - n8n
+  - stt
+  - tts
+  - qdrant
+  - uptime-kuma
+  - grafana
+  - loki
+  - alloy
+
+# Containers that may be removed (risky tier, code required). Empty by default.
+removable: []
+
+# Actions executed on the host by /usr/local/bin/sakir-hostops (root).
+host_actions:
+  - disk_usage
+  - ssl_expiry
+  - nginx_test
+  - nginx_reload
+  - ssl_renew
+  - reboot
+  - poweroff
+
+# Approval settings for the risky tier.
+approval:
+  code_ttl_seconds: 600       # code expires after 10 minutes
+  max_attempts: 3             # wrong codes before the request is cancelled
+  backup_max_age_hours: 24    # reboot/poweroff need a backup this fresh
