@@ -75,6 +75,7 @@ server action is a named action in safe-exec.
 | Qdrant + indexer | `services/indexer/` | Search over `knowledge/` (collections `restora`, `me`, `ops`) | stt |
 | n8n | upstream image | Free for Sakir's own no-code automations; not used by the core | — |
 | Monitoring | `config/loki.yaml`, `config/alloy.config`, Grafana provisioning | Logs (30 days), uptime, dashboards | Docker socket (read-only) |
+| settings-ui | `services/settings-ui/` | Web edit form for tokens, keys, budget, autonomy, retention; "Apply" recreates the affected container | Docker socket (read/write), the whole project directory |
 
 ## Customer message flow
 
@@ -141,8 +142,8 @@ cancels all pending requests.
 | --- | --- |
 | Internet (UFW) | 22 (SSH, key-only), 80/443 (Nginx) |
 | Public paths | `/meta/webhook` → dt-assistant, `/hooks/*` → n8n webhooks, `/public-media/*` → images for Instagram |
-| 127.0.0.1 only | dt-assistant 8081, n8n 5678, Grafana 3000, Uptime Kuma 3001 (reach via Tailscale or SSH tunnel) |
-| Docker socket | safe-exec (read/write, allowlisted actions only), Alloy (read-only, logs) |
+| 127.0.0.1 only | dt-assistant 8081, n8n 5678, Grafana 3000, Uptime Kuma 3001, settings-ui 8090 (reach via Tailscale or SSH tunnel) |
+| Docker socket | safe-exec (read/write, allowlisted actions only), Alloy (read-only, logs), settings-ui (read/write, password-protected — see D-015) |
 | DT products (future) | run natively on the host (Nginx → PHP-FPM/Node, MySQL/PostgreSQL, Redis via systemd), not in Docker — see D-013 |
 
 ## Resource limits
