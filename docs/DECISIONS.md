@@ -5,6 +5,30 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-013 · DT products run natively on the host; Sakir AI stays in Docker; hostname sakir-ai-001
+**Date:** 2026-10-29
+**Context:** Sakir prefers DT production apps (DT Restora and later products) to run directly on
+the server, not in Docker. On Linux, containers are not virtual machines: CPU and memory run at
+native speed. The measurable costs are small and avoidable — Docker's bridge network/NAT adds
+a little latency (host networking or a Unix socket removes it), heavy writes inside the
+container's own filesystem are slower (volumes avoid it), and very chatty `json-file` logs cost
+some I/O. The real gains of native for a Laravel/PHP stack are familiar tuning (PHP-FPM pools,
+OPcache, MySQL buffer pool), direct systemd management and one less layer to debug at 3 a.m.
+**Decision:**
+- DT products run natively: Nginx (already on the host) → PHP-FPM / Node, with MySQL or
+  PostgreSQL and Redis installed from apt, managed by systemd. Each product gets its own Nginx
+  server block, database and system user.
+- The Sakir AI stack stays in Docker: its containers are capped, isolated from production and
+  are what keeps agents away from the host (safe-exec, no shell).
+- Native services get resource priority over the AI stack: the AI containers already have hard
+  CPU/RAM caps; production can additionally run in a systemd slice with a higher `CPUWeight`.
+- The installer names the server `sakir-ai-001` (`SERVER_HOSTNAME`, set in the `system` step;
+  cloud-init is told to keep it).
+**Consequence:** A future `prod` installer step will add the native stack (versions to be
+confirmed: PHP, database, Node). safe-exec's allowlist will gain `systemctl restart` actions
+for these services, and `scripts/backup.d/` hooks will dump their databases with `mysqldump`
+or `pg_dump` from the host instead of `docker exec`.
+
 ## D-012 · One rule file for every AI coding tool; the assistant is "Sakir AI 001"
 **Date:** 2026-10-29
 **Context:** Sakir wants to set up and fix the server with whichever AI app he has open —

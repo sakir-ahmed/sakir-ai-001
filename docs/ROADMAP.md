@@ -91,6 +91,14 @@ Start only after phases 1–6 run smoothly for a month.
 - [ ] Private use only first: Sakir ↔ assistant calls; customers still get "Datatech BD Assistant"
 - [ ] Decide budget; update DECISIONS.md
 
+## Native production stack for DT products (when DT Restora moves to this server)
+- [ ] Confirm versions: PHP ___, Laravel ___, database (MySQL ___ / PostgreSQL ___), Redis, Node ___
+- [ ] Installer step `prod`: PHP-FPM, database, Redis via apt; one system user, database and Nginx server block per product
+- [ ] systemd slice with higher CPU priority for production services
+- [ ] safe-exec allowlist: restart/status of the native services
+- [ ] Backup hook in `scripts/backup.d/` (mysqldump / pg_dump from the host)
+- [ ] Uptime Kuma monitors for each product URL
+
 ## Phase 8 — More products (2027)
 For each new product (Propix, Salona, Delivo, Pharmo, Garagio, Factora):
 - [ ] Copy `knowledge/products/dt-restora/` to `knowledge/products/dt-<name>/` and fill it
