@@ -423,10 +423,11 @@ step_secrets() {
   done < "${INSTALL_DIR}/versions.env"
 
   # ---- External secrets (you create these; see README "Before you install") ----
-  local owner hermes_bot sales_bot or_sales meta_secret meta_page meta_token ig_user
+  local owner hermes_bot sales_bot or_hermes or_sales meta_secret meta_page meta_token ig_user
   ask owner "Your numeric Telegram user ID (from @userinfobot)" "$(env_get "$S/dt-assistant.env" TELEGRAM_OWNER_ID)"
   ask_secret hermes_bot "Token of @SakirAI_bot (Hermes, from @BotFather)"
   ask_secret sales_bot  "Token of @DTSalesDesk_bot (approvals, from @BotFather)"
+  ask_secret or_hermes  "OpenRouter API key for HERMES (your assistant's own brain)"
   ask_secret or_sales   "OpenRouter API key for SALES (limit about \$26/month)"
   ask_secret meta_secret "Meta App Secret (developers.facebook.com > App settings > Basic)"
   ask meta_page "Facebook Page ID" "$(env_get "$S/dt-assistant.env" META_PAGE_ID)"
@@ -451,6 +452,9 @@ step_secrets() {
   internal_token="$(env_get "$S/dt-assistant.env" INTERNAL_API_TOKEN)"; [[ -n "$internal_token" ]] || internal_token="$(gen_secret)"
   verify_token="$(env_get "$S/dt-assistant.env" META_VERIFY_TOKEN)";    [[ -n "$verify_token" ]]   || verify_token="$(gen_secret)"
   grafana_pw="$(env_get "$S/grafana.env" GF_SECURITY_ADMIN_PASSWORD)";  [[ -n "$grafana_pw" ]]     || grafana_pw="$(gen_secret)"
+  local settings_pw settings_is_new=0
+  settings_pw="$(env_get "$S/settings-ui.env" SETTINGS_UI_PASSWORD)"
+  [[ -n "$settings_pw" ]] || { settings_pw="$(gen_secret)"; settings_is_new=1; }
 
   # helper: set only when a new value was typed (empty answer keeps the old one)
   _set_if() { [[ -n "$3" ]] && env_set "$1" "$2" "$3" || env_ensure "$1" "$2" ""; }
@@ -500,6 +504,17 @@ step_secrets() {
   env_set "$H" TTS_URL "http://tts:8000"
   env_set "$H" AI_DB_RO_URL "postgresql://hermes_ro:${ro_pw}@ai-db:5432/sakirai"
 
+  # settings-ui: the web edit form (services/settings-ui). Password is shown
+  # once, right here, because — unlike Grafana's — there is no other admin
+  # screen that already knows it; after this it only ever prints masked
+  # ("set"), matching hard rule #1 (never print secrets after they exist).
+  env_set "$S/settings-ui.env" SETTINGS_UI_USER sakir
+  env_set "$S/settings-ui.env" SETTINGS_UI_PASSWORD "$settings_pw"
+  if ((settings_is_new)); then
+    warn "Settings page password (shown once): ${settings_pw}"
+    warn "Reach it at http://127.0.0.1:8090 over Tailscale/SSH tunnel; see docs/OPERATIONS.md"
+  fi
+
   # Grafana admin
   env_set "$S/grafana.env" GF_SECURITY_ADMIN_USER admin
   env_set "$S/grafana.env" GF_SECURITY_ADMIN_PASSWORD "$grafana_pw"
@@ -511,6 +526,7 @@ step_secrets() {
   touch "$HE"; chmod 600 "$HE"
   [[ -n "$hermes_bot" ]] && env_set "$HE" TELEGRAM_BOT_TOKEN "$hermes_bot"
   [[ -n "$owner" ]] && env_set "$HE" TELEGRAM_ALLOWED_USERS "$owner"
+  [[ -n "$or_hermes" ]] && env_set "$HE" OPENROUTER_API_KEY "$or_hermes"
 
   chown -R root:root "$S"; chmod 600 "$S"/*.env
 
@@ -518,6 +534,7 @@ step_secrets() {
   local missing=()
   [[ -n "$(env_get "$D" TELEGRAM_OWNER_ID)" ]] || missing+=("Telegram user ID")
   [[ -n "$(env_get "$S/safe-exec.env" TELEGRAM_BOT_TOKEN)" ]] || missing+=("@SakirAI_bot token")
+  [[ -n "$(env_get "$HE" OPENROUTER_API_KEY)" ]] || missing+=("OpenRouter key for Hermes")
   [[ -n "$(env_get "$D" SALES_BOT_TOKEN)" ]] || missing+=("@DTSalesDesk_bot token")
   [[ -n "$(env_get "$D" OPENROUTER_API_KEY)" ]] || missing+=("OpenRouter sales key")
   [[ -n "$(env_get "$D" META_PAGE_TOKEN)" ]] || missing+=("Meta Page token (sales stays off)")
@@ -653,18 +670,32 @@ step_hermes() {
   rsync -a "${INSTALL_DIR}/hermes/skills/" "$H/skills/"
   ok "Installed $(find "${INSTALL_DIR}/hermes/skills" -name SKILL.md | wc -l) Sakir skills"
 
+  # We write config.yaml ourselves instead of running `hermes setup`: that
+  # interactive wizard logs into the Nous Portal and offers to create a brand
+  # new Telegram bot, which is not what we want (we already have
+  # @SakirAI_bot's token in data/hermes/.env) and it has crashed under
+  # `docker compose run ... </dev/tty` on at least one real install. Telegram
+  # and the OpenRouter key are picked up from data/hermes/.env at startup
+  # (Hermes' own env file, confirmed by its docs); config.yaml only needs the
+  # model choice below.
   if [[ ! -f "$H/config.yaml" ]]; then
-    if [[ "$NON_INTERACTIVE" == "1" ]]; then
-      warn "Hermes is not configured. Run: sudo bash ${INSTALL_DIR}/install.sh --step hermes"
-      return 0
-    fi
-    info "Starting the Hermes setup wizard. Choose:"
-    info "  Provider: OpenRouter  -> paste your 'hermes-core' OpenRouter key"
-    info "  Model:    deepseek/deepseek-v3.2   (fallback: google/gemini-2.5-flash)"
-    info "  Messaging: Telegram   -> bot token and allowed user are pre-filled; confirm them"
-    docker compose run --rm hermes setup </dev/tty
+    cat > "$H/config.yaml" <<'YAML'
+# Written by Sakir AI 001's installer (not the interactive wizard).
+# Change the model any time from Telegram: /model openrouter:<name>
+_config_version: 10
+model: "openrouter:deepseek/deepseek-v3.2"
+fallback_model:
+  provider: openrouter
+  model: google/gemini-2.5-flash
+YAML
+    chown 10001:10001 "$H/config.yaml" 2>/dev/null || true
+    ok "Wrote data/hermes/config.yaml (model: deepseek-v3.2 via OpenRouter)"
   else
     info "Hermes already configured (config.yaml exists)"
+  fi
+
+  if [[ -z "$(env_get "$H/.env" OPENROUTER_API_KEY)" ]]; then
+    warn "No OpenRouter key for Hermes yet. Add one: sudo bash ${INSTALL_DIR}/install.sh --step secrets"
   fi
 
   docker compose up -d hermes
@@ -728,7 +759,7 @@ step_timers() {
 step_tailscale() {
   section "Tailscale (private admin access)"
   if ! command -v tailscale >/dev/null; then
-    if ! confirm "Install Tailscale for private access to n8n, Grafana and Uptime Kuma?"; then
+    if ! confirm "Install Tailscale for private access to n8n, Grafana, Uptime Kuma and Settings?"; then
       info "Skipped. You can use SSH tunnels instead (see README)."
       return 0
     fi
@@ -742,11 +773,13 @@ step_tailscale() {
   tailscale serve --bg --https=8443 http://127.0.0.1:5678 >/dev/null   # n8n
   tailscale serve --bg --https=3443 http://127.0.0.1:3000 >/dev/null   # Grafana
   tailscale serve --bg --https=3444 http://127.0.0.1:3001 >/dev/null   # Uptime Kuma
+  tailscale serve --bg --https=8446 http://127.0.0.1:8090 >/dev/null   # Settings
   local ts_name; ts_name="$(tailscale status --json | jq -r '.Self.DNSName' | sed 's/\.$//')"
   ok "Private URLs (only on your tailnet):"
   ok "  n8n:         https://${ts_name}:8443"
   ok "  Grafana:     https://${ts_name}:3443"
   ok "  Uptime Kuma: https://${ts_name}:3444"
+  ok "  Settings:    https://${ts_name}:8446  (user: sakir; sakir-ai secret SETTINGS_UI_PASSWORD)"
   mark_done tailscale
 }
 

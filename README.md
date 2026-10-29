@@ -147,6 +147,10 @@ sudo bash install.sh --step aitools      # add Claude Code / Codex / Grok / Gemi
    is fine), certificate expiry.
 9. **Grafana** (`https://<tailnet-name>:3443`): log in as `admin` with
    `sakir-ai secret GF_SECURITY_ADMIN_PASSWORD`; Loki is already connected.
+9b. **Settings page** (`https://<tailnet-name>:8446` or SSH tunnel to `:8090`): log in as
+   `sakir` with the password printed during `install.sh --step secrets` (or
+   `sakir-ai secret SETTINGS_UI_PASSWORD`). Change tokens, the sales budget, retention and
+   autonomy from a browser from now on — see docs/OPERATIONS.md "Settings page".
 10. **Test the sales flow**: from a personal Facebook account (added as a tester),
     message the Page "dam koto?" → a draft card appears in @DTSalesDesk_bot within a
     minute → tap Approve → the reply arrives in Messenger.
@@ -154,8 +158,8 @@ sudo bash install.sh --step aitools      # add Claude Code / Codex / Grok / Gemi
     → a code arrives → send `confirm <id> <code>` (only after a backup exists).
 
 No Tailscale? Use an SSH tunnel from your laptop:
-`ssh -L 5678:127.0.0.1:5678 -L 3000:127.0.0.1:3000 -L 3001:127.0.0.1:3001 sakir@<server-ip>`
-then open http://localhost:5678 (n8n), :3000 (Grafana), :3001 (Uptime Kuma).
+`ssh -L 5678:127.0.0.1:5678 -L 3000:127.0.0.1:3000 -L 3001:127.0.0.1:3001 -L 8090:127.0.0.1:8090 sakir@<server-ip>`
+then open http://localhost:5678 (n8n), :3000 (Grafana), :3001 (Uptime Kuma), :8090 (Settings).
 
 ---
 
@@ -222,6 +226,7 @@ then `sakir-ai restart dt-assistant`.
 | qdrant + indexer | knowledge search | internal |
 | n8n (+ n8n-db) | your own no-code workflows | 127.0.0.1:5678; public webhooks at `/hooks/<path>` |
 | uptime-kuma, loki, alloy, grafana | monitoring | 127.0.0.1:3001 / 3000 |
+| settings-ui | web edit form for tokens, budget, autonomy, retention | 127.0.0.1:8090 |
 
 ---
 

@@ -62,7 +62,7 @@ jobs:
       - name: compose.yml is valid
         run: |
           mkdir -p secrets
-          for f in hermes dt-assistant ai-db n8n n8n-db safe-exec grafana; do echo "X=1" > "secrets/$f.env"; done
+          for f in hermes dt-assistant ai-db n8n n8n-db safe-exec grafana settings-ui; do echo "X=1" > "secrets/$f.env"; done
           cp versions.env .env && echo "PUBLIC_DOMAIN=ci.example.com" >> .env
           docker compose config --quiet
           docker compose --profile jobs config --quiet

@@ -5,6 +5,39 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-015 · A web edit form for Sakir's own settings; Hermes' setup wizard dropped
+**Date:** 2026-10-29
+**Context:** The first real install stalled inside `docker compose run --rm hermes setup`
+(the upstream interactive wizard): it logged into Nous's own hosted provider instead of
+OpenRouter, defaulted to creating a brand-new Telegram bot instead of reusing the already
+configured `@SakirAI_bot`, and crashed on Ctrl+C partway through `install.sh`. Separately,
+Sakir asked for an easier way to change settings later than re-running the installer's
+interactive prompts over SSH.
+**Decision:**
+- `step_hermes` no longer runs the wizard. It writes `data/hermes/config.yaml` itself (model
+  only; Telegram and the OpenRouter key were already being read from `data/hermes/.env`, which
+  the installer pre-seeds — confirmed against Hermes' own docs, which treat that `.env` as a
+  full alternative to the wizard). A missing Hermes OpenRouter key is now asked for in
+  `step_secrets` like every other key, instead of being silently skipped.
+- New `settings-ui` service (`services/settings-ui/`): one page, Telegram/OpenRouter/Meta
+  tokens, sales budget, data retention, and which intents may auto-send — "Save" writes the
+  same files `install.sh --step secrets` would, "Apply" runs
+  `docker compose up -d --force-recreate <service>` so the change takes effect immediately.
+  Reached over Tailscale or an SSH tunnel only, one HTTP Basic password (shown once at
+  install, rotate with `sakir-ai settings-password`); never through the public Nginx.
+  `autonomy.never_auto` is not a field on the page at all, and the server refuses to save an
+  `auto_intents` list that overlaps it even if the request is hand-crafted — D-004 cannot be
+  switched off by anyone who only has the Settings password.
+- Trade-off, accepted deliberately: unlike every other container, settings-ui mounts the whole
+  project directory read-write plus the Docker socket (needed to recreate a container with a
+  freshly-written secret) — equivalent in reach to Sakir's own SSH/root access, not to an
+  agent's. Domain/TLS/Nginx stay out of scope: those need real system commands this container
+  should not run; `docs/OPERATIONS.md` still covers them.
+**Consequence:** A fresh install no longer depends on an interactive upstream wizard behaving
+a particular way over SSH. Changing a token, the budget, or which replies go out automatically
+is now a form and one click — no SSH needed — but the settings-ui password is as sensitive as
+root and must be treated that way.
+
 ## D-014 · Alerts that reach Sakir even when the server cannot
 **Date:** 2026-10-29
 **Context:** Uptime Kuma runs on the same server, so a dead server could not alert anyone;

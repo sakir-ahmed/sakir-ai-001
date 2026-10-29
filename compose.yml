@@ -312,6 +312,33 @@ services:
     mem_limit: 512m
     depends_on: [loki]
 
+  # ---------------------------------------------------------------------------
+  # settings-ui: the web "edit form" for Sakir's own tokens/keys/budget (see
+  # services/settings-ui/app.py). Reached over Tailscale or an SSH tunnel
+  # only, exactly like n8n/Grafana/Uptime Kuma above — never through the
+  # public Nginx. NOTE: unlike every other service here it mounts the whole
+  # project directory read-write plus the Docker socket, so it can recreate
+  # a container with freshly-saved settings (see docs/DECISIONS.md D-015).
+  # It is password-protected (`sakir-ai secret SETTINGS_UI_PASSWORD` to see
+  # it, `sakir-ai settings-password` to rotate it); treat that password with
+  # the same care as the server's root password.
+  # ---------------------------------------------------------------------------
+  settings-ui:
+    <<: *common
+    image: sakir-ai/settings-ui:local
+    build: ./services/settings-ui
+    container_name: settings-ui
+    env_file: [./secrets/settings-ui.env]
+    environment:
+      INSTALL_DIR: /opt/sakir-ai
+    volumes:
+      - ./:/opt/sakir-ai          # must equal INSTALL_DIR on the host — see Dockerfile
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports: ["127.0.0.1:8090:8080"]
+    networks: [ops]
+    cpus: 0.5
+    mem_limit: 256m
+
 networks:
   ai:
     name: sakir-ai_ai

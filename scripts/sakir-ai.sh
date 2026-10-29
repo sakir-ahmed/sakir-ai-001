@@ -13,6 +13,7 @@
 #   sakir-ai backup              run the encrypted backup now
 #   sakir-ai pause | resume      stop/restart automatic customer replies
 #   sakir-ai secret <KEY>        print one secret value (e.g. META_VERIFY_TOKEN)
+#   sakir-ai settings-password   rotate the web Settings page password
 #   sakir-ai versions            image versions in use (to pin in .env)
 #   sakir-ai shell <svc>         open a shell inside a container
 # =============================================================================
@@ -88,6 +89,12 @@ case "$cmd" in
   secret)
     [[ $# -eq 1 ]] || die "Usage: sakir-ai secret <KEY>"
     grep -h "^$1=" secrets/*.env .env 2>/dev/null | head -n1 | cut -d= -f2- || die "Not found: $1" ;;
+  settings-password)
+    new_pw="$(openssl rand -hex 24)"
+    env_set "secrets/settings-ui.env" SETTINGS_UI_PASSWORD "$new_pw"
+    docker compose up -d --force-recreate settings-ui >/dev/null
+    ok "New Settings page password: ${new_pw}"
+    ok "(shown once — it is not printed again; re-run this command to rotate)" ;;
   versions)
     docker compose images --format 'table {{.Service}}\t{{.Repository}}\t{{.Tag}}\t{{.ID}}'
     echo
