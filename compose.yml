@@ -2,8 +2,9 @@
 # Sakir AI 001 — all services on one host
 #
 # Networks
-#   ai   : Hermes, dt-assistant, n8n, databases, speech, search, safe-exec
-#   ops  : monitoring (Loki, Alloy, Grafana, Uptime Kuma) + safe-exec
+#   ai   : Hermes, dt-assistant, n8n, databases, speech, search, safe-exec,
+#          settings-ui (reads dt-assistant's /internal/* API for the dashboard)
+#   ops  : monitoring (Loki, Alloy, Grafana, Uptime Kuma) + safe-exec + settings-ui
 #   Future DT production apps get their OWN network; nothing here joins it.
 #
 # Exposure
@@ -12,8 +13,9 @@
 #   Tailscale or an SSH tunnel.
 #
 # Docker socket
-#   Only safe-exec (restarts, logs) and alloy (log shipping, read-only)
-#   mount it. Hermes, n8n and dt-assistant never do.
+#   Only safe-exec (restarts, logs), alloy (log shipping, read-only) and
+#   settings-ui (read/write, password-protected) mount it. Hermes, n8n and
+#   dt-assistant never do.
 #
 # Resource caps total about 9 vCPU / 22 GB, leaving room for DT products.
 # Image tags come from .env (seeded from versions.env).
@@ -313,8 +315,10 @@ services:
     depends_on: [loki]
 
   # ---------------------------------------------------------------------------
-  # settings-ui: the web "edit form" for Sakir's own tokens/keys/budget (see
-  # services/settings-ui/app.py). Reached over Tailscale or an SSH tunnel
+  # settings-ui: the live dashboard (flow diagram, container health, leads,
+  # approvals, spend — "/") and the web "edit form" for Sakir's own
+  # tokens/keys/budget ("/settings"); see services/settings-ui/app.py.
+  # Reached over Tailscale or an SSH tunnel
   # only, exactly like n8n/Grafana/Uptime Kuma above — never through the
   # public Nginx. NOTE: unlike every other service here it mounts the whole
   # project directory read-write plus the Docker socket, so it can recreate
@@ -335,7 +339,7 @@ services:
       - ./:/opt/sakir-ai          # must equal INSTALL_DIR on the host — see Dockerfile
       - /var/run/docker.sock:/var/run/docker.sock
     ports: ["127.0.0.1:8090:8080"]
-    networks: [ops]
+    networks: [ops, ai]   # ai: so the dashboard can read dt-assistant's /internal/* API
     cpus: 0.5
     mem_limit: 256m
 

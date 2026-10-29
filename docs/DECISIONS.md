@@ -19,10 +19,15 @@ interactive prompts over SSH.
   the installer pre-seeds — confirmed against Hermes' own docs, which treat that `.env` as a
   full alternative to the wizard). A missing Hermes OpenRouter key is now asked for in
   `step_secrets` like every other key, instead of being silently skipped.
-- New `settings-ui` service (`services/settings-ui/`): one page, Telegram/OpenRouter/Meta
-  tokens, sales budget, data retention, and which intents may auto-send — "Save" writes the
-  same files `install.sh --step secrets` would, "Apply" runs
-  `docker compose up -d --force-recreate <service>` so the change takes effect immediately.
+- New `settings-ui` service (`services/settings-ui/`), two pages behind one login:
+  - `/` — a dashboard: the system's flow diagram, every container's state/health, the sales
+    pipeline (leads by stage, messages, approvals waiting) and spend from dt-assistant's own
+    `/internal/*` API, and how long ago the last backup ran. Read-only; still renders if
+    dt-assistant itself is down or paused.
+  - `/settings` — Telegram/OpenRouter/Meta tokens, sales budget, data retention, and which
+    intents may auto-send. "Save" writes the same files `install.sh --step secrets` would,
+    "Apply" runs `docker compose up -d --force-recreate <service>` so the change takes effect
+    immediately.
   Reached over Tailscale or an SSH tunnel only, one HTTP Basic password (shown once at
   install, rotate with `sakir-ai settings-password`); never through the public Nginx.
   `autonomy.never_auto` is not a field on the page at all, and the server refuses to save an

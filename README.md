@@ -147,10 +147,11 @@ sudo bash install.sh --step aitools      # add Claude Code / Codex / Grok / Gemi
    is fine), certificate expiry.
 9. **Grafana** (`https://<tailnet-name>:3443`): log in as `admin` with
    `sakir-ai secret GF_SECURITY_ADMIN_PASSWORD`; Loki is already connected.
-9b. **Settings page** (`https://<tailnet-name>:8446` or SSH tunnel to `:8090`): log in as
+9b. **Dashboard & Settings** (`https://<tailnet-name>:8446` or SSH tunnel to `:8090`): log in as
    `sakir` with the password printed during `install.sh --step secrets` (or
-   `sakir-ai secret SETTINGS_UI_PASSWORD`). Change tokens, the sales budget, retention and
-   autonomy from a browser from now on — see docs/OPERATIONS.md "Settings page".
+   `sakir-ai secret SETTINGS_UI_PASSWORD`). `/` shows the whole system at a glance (flow
+   diagram, container health, leads, approvals waiting, spend, last backup); `/settings`
+   changes tokens, budget, retention and autonomy from a browser — see docs/OPERATIONS.md.
 10. **Test the sales flow**: from a personal Facebook account (added as a tester),
     message the Page "dam koto?" → a draft card appears in @DTSalesDesk_bot within a
     minute → tap Approve → the reply arrives in Messenger.
@@ -226,7 +227,7 @@ then `sakir-ai restart dt-assistant`.
 | qdrant + indexer | knowledge search | internal |
 | n8n (+ n8n-db) | your own no-code workflows | 127.0.0.1:5678; public webhooks at `/hooks/<path>` |
 | uptime-kuma, loki, alloy, grafana | monitoring | 127.0.0.1:3001 / 3000 |
-| settings-ui | web edit form for tokens, budget, autonomy, retention | 127.0.0.1:8090 |
+| settings-ui | dashboard (`/`) + web edit form (`/settings`) for tokens, budget, autonomy, retention | 127.0.0.1:8090 |
 
 ---
 

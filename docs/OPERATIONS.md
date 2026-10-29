@@ -38,9 +38,9 @@ backup from the last 24 hours. Check after: `sakir-ai health`.
 - [ ] Check the Meta Graph API version in `config/dt-assistant.yaml` is still supported.
 - [ ] Remove unused Telegram sessions and Tailscale devices.
 
-## Settings page (change tokens, budget, autonomy from a browser)
+## Dashboard and Settings page (one browser tab, no SSH)
 
-No SSH needed for the values that change often. Reach it at `http://127.0.0.1:8090`:
+Reach it at `http://127.0.0.1:8090`:
 - Over Tailscale (if `install.sh --step tailscale` was run): `https://<server-name>.<tailnet>.ts.net:8446`
 - Otherwise, an SSH tunnel from your laptop: `ssh -L 8090:127.0.0.1:8090 sakir@<server-ip>`,
   then open `http://127.0.0.1:8090` in your own browser.
@@ -49,15 +49,23 @@ Log in as `sakir`; the password was printed once during install
 (`sudo bash install.sh --step secrets` to see it again if that scrollback is gone, or
 `sakir-ai secret SETTINGS_UI_PASSWORD`). To rotate it: `sakir-ai settings-password`.
 
-It edits Telegram tokens, OpenRouter keys, Meta/Instagram credentials, the sales budget,
-data retention, and which reply intents may send without your approval — then restarts only
-the affected container. It never shows a secret's current value (same "blank keeps it" rule
-as the installer), and it cannot be used to make `price`/`discount`/`order`/`complaint`/`legal`
-automatic, whatever is typed into it. Domain, Nginx and TLS are not on this page — see
-"Updating" above for those; they need real root commands this page does not run.
+**`/` — Dashboard.** The whole system on one page: a flow diagram of how everything connects
+(Telegram ↔ Hermes ↔ safe-exec ↔ host; Meta ↔ dt-assistant ↔ ai-db ↔ the approvals bot), every
+container's state and health, today's lead pipeline and message/approval counts, this month's
+sales spend against budget, the approvals currently waiting for you, and how long ago the last
+backup ran. If dt-assistant is paused, restarting, or not configured yet, that section just
+says so instead of breaking the page.
 
-Treat the settings password like the server's root password: whoever has it can see which
-secrets are set and restart Hermes, dt-assistant or safe-exec.
+**`/settings` — the edit form.** Telegram tokens, OpenRouter keys, Meta/Instagram credentials,
+the sales budget, data retention, and which reply intents may send without your approval — then
+restarts only the affected container. It never shows a secret's current value (same "blank
+keeps it" rule as the installer), and it cannot be used to make
+`price`/`discount`/`order`/`complaint`/`legal` automatic, whatever is typed into it. Domain,
+Nginx and TLS are not on this page — see "Updating" above for those; they need real root
+commands this page does not run.
+
+Treat the password like the server's root password: whoever has it can see which secrets are
+set, read the sales pipeline, and restart Hermes, dt-assistant or safe-exec.
 
 ## Raising autonomy
 

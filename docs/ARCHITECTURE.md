@@ -75,7 +75,7 @@ server action is a named action in safe-exec.
 | Qdrant + indexer | `services/indexer/` | Search over `knowledge/` (collections `restora`, `me`, `ops`) | stt |
 | n8n | upstream image | Free for Sakir's own no-code automations; not used by the core | — |
 | Monitoring | `config/loki.yaml`, `config/alloy.config`, Grafana provisioning | Logs (30 days), uptime, dashboards | Docker socket (read-only) |
-| settings-ui | `services/settings-ui/` | Web edit form for tokens, keys, budget, autonomy, retention; "Apply" recreates the affected container | Docker socket (read/write), the whole project directory |
+| settings-ui | `services/settings-ui/` | Dashboard (`/`: flow diagram, container health, sales pipeline, spend, backup age) + web edit form (`/settings`: tokens, keys, budget, autonomy, retention; "Apply" recreates the affected container) | Docker socket (read/write), the whole project directory, dt-assistant's `/internal/*` API |
 
 ## Customer message flow
 
