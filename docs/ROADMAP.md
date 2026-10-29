@@ -26,6 +26,7 @@ the plan from the blueprint; move them if needed and note why in DECISIONS.md.
 - [x] Speech, TTS, knowledge indexer
 - [x] Hermes skills and `tools/sakir.py`
 - [x] Docs: architecture, decisions, operations
+- [x] AGENTS.md shared by Claude Code, Codex, Grok, Gemini; AI tools installer
 
 ## Phase 1 — Foundation (Nov 2–8)
 - [ ] SSH key on laptop; DNS A record for the webhook domain
@@ -35,6 +36,8 @@ the plan from the blueprint; move them if needed and note why in DECISIONS.md.
 - [ ] OpenRouter: $40 credit, keys `hermes-core` ($12) and `sales` ($26)
 - [ ] Run `sudo bash install.sh` on the server
 - [ ] Save the backup private key in the password manager
+- [ ] Optional: AI coding tools (`--step aitools`); log in to each once (docs/AI-TOOLS.md)
+- [ ] Set @SakirAI_bot display name to "Sakir AI 001" in @BotFather
 - [ ] Configure rclone remote `sakir-backup`; confirm a backup uploads
 - [ ] First restore test passes
 - [ ] Fill `knowledge/me/` (profile TODOs, voice with 10 real examples, likes-dislikes, goals)

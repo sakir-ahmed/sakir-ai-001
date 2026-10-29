@@ -5,6 +5,17 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-012 · One rule file for every AI coding tool; the assistant is "Sakir AI 001"
+**Date:** 2026-10-29
+**Context:** Sakir wants to set up and fix the server with whichever AI app he has open —
+Claude, ChatGPT/Codex, Grok or Gemini — and call his assistant "Sakir AI 001".
+**Decision:** `AGENTS.md` holds all rules (read by Codex and Grok Build); `CLAUDE.md` and
+`GEMINI.md` only import it. `scripts/install-ai-tools.sh` (installer step `aitools`, optional)
+installs the four CLIs for the admin user with their official installers. Hermes introduces
+itself as "Sakir AI 001"; customers still see "Datatech BD Assistant".
+**Consequence:** Change rules in one place only. Each tool uses Sakir's own subscription or
+key; nothing is stored by the installer.
+
 ## D-011 · Approvals by plain message, not a slash command
 **Date:** 2026-10-29
 **Context:** The blueprint said Sakir approves risky actions with `/confirm <id> <code>`.

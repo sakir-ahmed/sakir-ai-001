@@ -19,6 +19,8 @@ The installer is idempotent: re-run it any time, or run one step with
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Why things are the way they are (and where they differ from the blueprint) |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | Daily/weekly/monthly routines, incident playbooks, updates, full restore |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phases and a checklist to tick off as you go |
+| [docs/AI-TOOLS.md](docs/AI-TOOLS.md) | Claude Code, Codex, Grok Build and Gemini CLI on the server |
+| [AGENTS.md](AGENTS.md) | Rules every AI tool follows on this repo and server |
 
 ---
 
@@ -32,7 +34,7 @@ with `sudo bash /opt/sakir-ai/install.sh --step secrets`.
 | 1 | **SSH key** on your laptop | `ssh-keygen -t ed25519`, then `ssh-copy-id root@<server-ip>` | Safe login; password login is turned off once a key works |
 | 2 | **Domain for webhooks** | DNS A record, e.g. `ai.datatechbd.com` → server IP | HTTPS for Facebook webhooks |
 | 3 | **Your Telegram user ID** | message @userinfobot | Only you can use the bots |
-| 4 | **@SakirAI_bot** token | @BotFather → `/newbot` | Hermes (your assistant) |
+| 4 | **@SakirAI_bot** token | @BotFather → `/newbot`, display name **Sakir AI 001** | Hermes (your assistant, "Sakir AI 001") |
 | 5 | **@DTSalesDesk_bot** token | @BotFather → `/newbot` | Approving customer replies |
 | 6 | **OpenRouter** account, $40 credit, 2 keys | openrouter.ai → Keys: `hermes-core` (limit $12), `sales` (limit $26) | AI models |
 | 7 | **Meta app** | developers.facebook.com → Business app → add Messenger + Webhooks; business verification of Datatech BD Ltd. | Facebook/Instagram replies and posting |
@@ -76,6 +78,7 @@ sudo bash install.sh --list              # which steps are done
 sudo bash install.sh --step tls          # get HTTPS after DNS points here
 sudo bash install.sh --step secrets      # add or change tokens later
 sudo bash install.sh --from stack        # rebuild/restart from the stack step
+sudo bash install.sh --step aitools      # add Claude Code / Codex / Grok / Gemini CLI later
 ```
 
 ---

@@ -18,6 +18,7 @@
 #   hermes      Hermes Agent setup wizard, skills, start
 #   timers      nightly backup and knowledge re-index (systemd timers)
 #   tailscale   private admin access to n8n, Grafana, Uptime Kuma (optional)
+#   aitools     Claude Code, Codex, Grok Build, Gemini CLI for the admin user (optional)
 #   verify      health check of everything
 #
 # Usage:
@@ -37,7 +38,7 @@ source "${BUNDLE_DIR}/lib/common.sh"
 
 trap 'error "Failed at line ${LINENO}: ${BASH_COMMAND}. See ${LOG_FILE}"' ERR
 
-STEPS=(preflight system admin firewall docker layout secrets knowledge nginx tls hostops stack hermes timers tailscale verify)
+STEPS=(preflight system admin firewall docker layout secrets knowledge nginx tls hostops stack hermes timers tailscale aitools verify)
 
 # Settings that can be overridden with environment variables.
 : "${ADMIN_USER:=sakir}"            # Linux admin account to create
@@ -633,6 +634,18 @@ step_tailscale() {
 }
 
 # =============================================================================
+# Step: aitools  (optional AI coding tools for Sakir, see docs/AI-TOOLS.md)
+# =============================================================================
+step_aitools() {
+  section "AI coding tools (optional)"
+  if [[ "$NON_INTERACTIVE" == "1" ]]; then
+    info "Skipped in non-interactive mode. Later: sudo bash ${INSTALL_DIR}/scripts/install-ai-tools.sh"
+    return 0
+  fi
+  ADMIN_USER="$ADMIN_USER" bash "${INSTALL_DIR}/scripts/install-ai-tools.sh"
+}
+
+# =============================================================================
 # Step: verify
 # =============================================================================
 step_verify() {
@@ -643,7 +656,7 @@ step_verify() {
 # =============================================================================
 # Runner
 # =============================================================================
-usage() { sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"; }   # prints the header comment
 
 list_steps() {
   local s
