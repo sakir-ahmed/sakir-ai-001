@@ -4,7 +4,7 @@
 #
 # What it does (each step is idempotent and can be re-run on its own):
 #   preflight   check OS, CPU architecture, RAM, disk, internet
-#   system      packages, timezone, swap, automatic security updates
+#   system      hostname, packages, timezone, swap, automatic security updates
 #   admin       admin user + SSH hardening (never locks you out, see notes)
 #   firewall    UFW: only SSH, HTTP, HTTPS open; fail2ban for SSH
 #   docker      Docker Engine + Compose from Docker's official apt repository
@@ -43,6 +43,7 @@ STEPS=(preflight system admin firewall docker layout secrets knowledge nginx tls
 # Settings that can be overridden with environment variables.
 : "${ADMIN_USER:=sakir}"            # Linux admin account to create
 : "${TIMEZONE:=Asia/Dhaka}"
+: "${SERVER_HOSTNAME:=sakir-ai-001}"   # shown in prompts, logs, alerts and Tailscale
 : "${SWAP_SIZE_GB:=8}"
 : "${NON_INTERACTIVE:=0}"
 
@@ -93,6 +94,24 @@ step_system() {
     jq git rsync openssl age rclone \
     nginx certbot python3-certbot-nginx \
     htop ncdu dnsutils
+
+  # Hostname: sakir-ai-001 by default (override with SERVER_HOSTNAME=...).
+  if [[ "$(hostnamectl --static 2>/dev/null || hostname)" != "$SERVER_HOSTNAME" ]]; then
+    hostnamectl set-hostname "$SERVER_HOSTNAME"
+    # Make the name resolve locally (sudo warns "unable to resolve host" otherwise).
+    if grep -q '^127\.0\.1\.1' /etc/hosts; then
+      sed -i "s/^127\.0\.1\.1.*/127.0.1.1 ${SERVER_HOSTNAME}/" /etc/hosts
+    else
+      echo "127.0.1.1 ${SERVER_HOSTNAME}" >> /etc/hosts
+    fi
+    # Many VPS images run cloud-init, which would reset the name on reboot.
+    if [[ -d /etc/cloud/cloud.cfg.d ]]; then
+      echo "preserve_hostname: true" > /etc/cloud/cloud.cfg.d/99-sakir-ai-hostname.cfg
+    fi
+    ok "Hostname set to ${SERVER_HOSTNAME}"
+  else
+    info "Hostname already ${SERVER_HOSTNAME}"
+  fi
 
   # Timezone: the schedules (backups 03:00, briefs 08:30) use local time.
   timedatectl set-timezone "$TIMEZONE"

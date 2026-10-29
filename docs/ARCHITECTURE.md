@@ -143,7 +143,7 @@ cancels all pending requests.
 | Public paths | `/meta/webhook` → dt-assistant, `/hooks/*` → n8n webhooks, `/public-media/*` → images for Instagram |
 | 127.0.0.1 only | dt-assistant 8081, n8n 5678, Grafana 3000, Uptime Kuma 3001 (reach via Tailscale or SSH tunnel) |
 | Docker socket | safe-exec (read/write, allowlisted actions only), Alloy (read-only, logs) |
-| Future DT products | their own Docker network; nothing in this stack joins it |
+| DT products (future) | run natively on the host (Nginx → PHP-FPM/Node, MySQL/PostgreSQL, Redis via systemd), not in Docker — see D-013 |
 
 ## Resource limits
 

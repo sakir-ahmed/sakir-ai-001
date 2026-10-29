@@ -22,6 +22,22 @@ The installer is idempotent: re-run it any time, or run one step with
 | [docs/AI-TOOLS.md](docs/AI-TOOLS.md) | Claude Code, Codex, Grok Build and Gemini CLI on the server |
 | [AGENTS.md](AGENTS.md) | Rules every AI tool follows on this repo and server |
 
+### What gets installed on the server itself (not in Docker)
+| Software | Why |
+| --- | --- |
+| Hostname `sakir-ai-001` | Set in the `system` step (change with `SERVER_HOSTNAME=...`) |
+| Docker Engine + Compose (official Docker repo) | Runs the Sakir AI containers |
+| Nginx + Certbot | Public HTTPS entry point; later also serves DT products |
+| UFW + fail2ban | Firewall (22, 80, 443 only) and brute-force bans |
+| unattended-upgrades | Automatic security updates (no automatic reboot) |
+| git, rsync, jq, curl, age, rclone, htop, ncdu, dnsutils | Install, backups (encrypted, off-site) and troubleshooting |
+| 8 GB swap, timezone Asia/Dhaka | Stability; schedules in local time |
+| Tailscale (optional) | Private access to admin screens |
+| Claude Code, Codex, Grok Build, Gemini CLI (optional) | AI coding tools for the `sakir` user |
+
+DT products (DT Restora and the rest) will run natively on this server, not in Docker,
+with their own PHP/Node, database and Redis — see [docs/DECISIONS.md](docs/DECISIONS.md) D-013.
+
 ---
 
 ## 1. Before you install (about 1 hour, mostly waiting)
