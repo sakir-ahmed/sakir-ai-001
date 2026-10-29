@@ -718,15 +718,24 @@ step_timers() {
 
   # Rotate the host log files written by the installer and scripts.
   install -m 644 "${INSTALL_DIR}/config/logrotate-sakir-ai" /etc/logrotate.d/sakir-ai
-  logrotate --debug /etc/logrotate.d/sakir-ai >/dev/null 2>&1 || warn "logrotate config check failed"
+  mkdir -p /var/lib/logrotate   # state dir; missing on a logrotate just installed this run
+  local lr_out
+  if lr_out="$(logrotate --debug /etc/logrotate.d/sakir-ai 2>&1)"; then
+    ok "logrotate config check passed"
+  else
+    warn "logrotate config check failed: ${lr_out##*$'\n'}"
+  fi
 
   # Backup encryption key: public key on the server, private key with Sakir.
   if [[ ! -s /root/backup-recipient.txt ]]; then
     local pub=""
     ask pub "age public key for backups (starts with age1...; Enter to generate one now)" ""
     if [[ -z "$pub" ]]; then
-      local tmpkey; tmpkey="$(mktemp)"
-      age-keygen -o "$tmpkey" 2>/dev/null
+      local tmpkey; tmpkey="$(mktemp -u)"   # -u: name only, no file — age-keygen
+                                             # refuses to write to a file that
+                                             # already exists, which plain
+                                             # `mktemp` always creates.
+      age-keygen -o "$tmpkey"
       age-keygen -y "$tmpkey" > /root/backup-recipient.txt
       echo
       warn "================ BACKUP PRIVATE KEY — SAVE IT NOW ================"
