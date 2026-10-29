@@ -49,6 +49,13 @@ for job in "${QUEUE}"/*.json; do
   case "$action" in
     disk_usage)
       out="$(df -h -x tmpfs -x overlay; echo; free -h)"; rc=0 ;;
+    reboot_required)
+      if [[ -f /var/run/reboot-required ]]; then
+        out="yes: $(sort -u /var/run/reboot-required.pkgs 2>/dev/null | tr '\n' ' ')"
+      else
+        out="no"
+      fi
+      rc=0 ;;
     ssl_expiry)
       out="$(certbot certificates 2>&1)"; rc=$? ;;
     nginx_test)

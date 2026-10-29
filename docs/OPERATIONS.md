@@ -27,6 +27,12 @@ updates and restores. Commands assume you are logged in as `sakir` on the server
 - [ ] Check OpenRouter prices for the three models in `config/dt-assistant.yaml`.
 - [ ] Decide on autonomy changes (below).
 
+### Security updates and reboots
+Updates install automatically every day; some (kernel, OpenSSL) need a reboot to take
+effect. When one is pending, `sakir-ai health` and the morning brief say so. Reboot at a
+quiet hour (e.g. 04:00) through Hermes ("reboot the server") — it needs your code and a
+backup from the last 24 hours. Check after: `sakir-ai health`.
+
 ### Every 6 months
 - [ ] Rotate keys with [`scripts/rotate-keys.md`](../scripts/rotate-keys.md).
 - [ ] Check the Meta Graph API version in `config/dt-assistant.yaml` is still supported.
@@ -82,6 +88,20 @@ and stay with you. After each change: `sakir-ai restart dt-assistant`.
 2. stt is the usual peak (transcribing long audio); it is capped at 2 vCPU.
 3. Memory kills: `sudo dmesg -T | grep -i oom`. Raise that service's `mem_limit` in
    `compose.yml` only if the server has room, then `sakir-ai start`.
+
+### Outside monitor alerted (healthchecks.io)
+- **Heartbeat down:** the server is off, unreachable, or the core is unhealthy (the alert
+  body lists what failed). Try SSH; if it does not answer, use the provider's web console;
+  if the server is gone, follow "Full restore" below.
+- **Backup missed or failed:** `sudo journalctl -u sakir-backup -n 50`; run `sakir-ai backup`
+  and watch it. Telegram also got the failure line.
+
+### Moving data/ to a second disk later
+The `disks` installer step only formats an empty disk while `data/` is empty. To move an
+existing install: `sakir-ai backup`, `sakir-ai stop`, mount the new disk at `/mnt/newdata`,
+`sudo rsync -aHAX /opt/sakir-ai/data/ /mnt/newdata/`, change the mount point in `/etc/fstab`
+to `/opt/sakir-ai/data` (after renaming the old folder to `data.old`), `sudo mount -a`,
+`sakir-ai start`, `sakir-ai health`; delete `data.old` only after a week of normal running.
 
 ### Disk almost full
 1. `sudo ncdu /opt/sakir-ai` — usually `backups/`, `data/loki`, or Docker images.
@@ -155,5 +175,6 @@ It decrypts, loads ai-db into a throwaway Postgres and prints row counts.
 | What did the installer do? | `/var/log/sakir-ai-install.log` |
 | Host actions (reboot, nginx, ssl) | `/var/log/sakir-hostops.log` |
 | Backup runs | `/var/log/sakir-ai-backup.log`, `journalctl -u sakir-backup` |
+| Heartbeat | `journalctl -u sakir-heartbeat`, and the healthchecks.io dashboard |
 | Container logs (30 days) | Grafana → Explore → Loki → `{container="dt-assistant"}` |
 | Sales data | ai-db tables `leads`, `messages`, `approvals`, `content_calendar`, `spend`, `metrics` |

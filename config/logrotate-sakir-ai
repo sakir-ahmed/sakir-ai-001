@@ -1,0 +1,16 @@
+# Sakir AI 001 — rotate the host log files the installer and scripts write.
+# Installed as /etc/logrotate.d/sakir-ai by `install.sh --step timers`.
+# Container logs are rotated by Docker itself (daemon.json: 20 MB x 5).
+/var/log/sakir-ai-install.log
+/var/log/sakir-ai-ops.log
+/var/log/sakir-ai-backup.log
+/var/log/sakir-ai-tools.log
+/var/log/sakir-hostops.log {
+    weekly
+    rotate 8
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0600 root root
+}

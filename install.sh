@@ -8,6 +8,7 @@
 #   admin       admin user + SSH hardening (never locks you out, see notes)
 #   firewall    UFW: only SSH, HTTP, HTTPS open; fail2ban for SSH
 #   docker      Docker Engine + Compose from Docker's official apt repository
+#   disks       optional: put data/ (databases, models) on an empty second disk, e.g. NVMe
 #   layout      copy this bundle to /opt/sakir-ai and create folders
 #   secrets     ask for tokens/keys, generate passwords, write secrets/*.env
 #   knowledge   create the knowledge Git repo from the templates
@@ -38,7 +39,7 @@ source "${BUNDLE_DIR}/lib/common.sh"
 
 trap 'error "Failed at line ${LINENO}: ${BASH_COMMAND}. See ${LOG_FILE}"' ERR
 
-STEPS=(preflight system admin firewall docker layout secrets knowledge nginx tls hostops stack hermes timers tailscale aitools verify)
+STEPS=(preflight system admin firewall docker disks layout secrets knowledge nginx tls hostops stack hermes timers tailscale aitools verify)
 
 # Settings that can be overridden with environment variables.
 : "${ADMIN_USER:=sakir}"            # Linux admin account to create
@@ -276,6 +277,86 @@ EOF
 }
 
 # =============================================================================
+# Step: disks  (optional: mount an EMPTY second disk at ${INSTALL_DIR}/data)
+#
+# Some VPS plans have a second, faster disk (e.g. NVMe next to an SSD). Putting
+# data/ there gives the databases, Qdrant and the speech models the fast disk.
+# Safety: only disks with no partitions, no filesystem and nothing mounted are
+# offered, and Sakir must type the device name to confirm formatting.
+# =============================================================================
+step_disks() {
+  section "Second disk for data (optional)"
+  local data="${INSTALL_DIR}/data"
+
+  if mountpoint -q "$data"; then
+    info "${data} is already its own mount ($(findmnt -no SOURCE "$data")); nothing to do"
+    mark_done disks; return 0
+  fi
+
+  # The disk that holds / is never offered.
+  local root_src root_disk
+  root_src="$(findmnt -no SOURCE /)"
+  root_disk="/dev/$(lsblk -no PKNAME "$root_src" 2>/dev/null | head -n1)"
+
+  local candidates=() name type size
+  while read -r name type size; do
+    [[ "$type" == "disk" && "$name" != "$root_disk" ]] || continue
+    # Not real disks: compressed RAM swap, loop images, RAM disks, CD/floppy.
+    [[ "$name" =~ ^/dev/(zram|loop|ram|sr|fd) ]] && continue
+    (( size >= 10 * 1024 * 1024 * 1024 )) || continue                   # under 10 GB
+    grep -q "^${name} " /proc/swaps && continue                         # used as swap
+    [[ "$(lsblk -nro NAME "$name" | wc -l)" -eq 1 ]] || continue        # has partitions
+    [[ -z "$(blkid -o value -s TYPE "$name" 2>/dev/null)" ]] || continue # has a filesystem
+    [[ -z "$(lsblk -nro MOUNTPOINT "$name" | tr -d '[:space:]')" ]] || continue
+    candidates+=("$name")
+  done < <(lsblk -dbpno NAME,TYPE,SIZE)
+
+  if ((${#candidates[@]} == 0)); then
+    info "No empty second disk found; data stays on the main disk."
+    info "Disks on this server:"; lsblk -o NAME,SIZE,TYPE,ROTA,TRAN,MOUNTPOINT | sed 's/^/    /'
+    mark_done disks; return 0
+  fi
+
+  if [[ -d "$data" && -n "$(ls -A "$data" 2>/dev/null)" ]]; then
+    warn "${data} already contains data; moving it needs a manual migration (docs/OPERATIONS.md)."
+    return 0
+  fi
+
+  info "Empty disk(s) found:"
+  lsblk -dpo NAME,SIZE,ROTA,TRAN,MODEL "${candidates[@]}" | sed 's/^/    /'
+  info "(ROTA=0 means solid-state; TRAN=nvme is the fastest.)"
+  if [[ "$NON_INTERACTIVE" == "1" ]]; then
+    warn "Non-interactive: not formatting. Run: sudo bash install.sh --step disks"
+    return 0
+  fi
+
+  local chosen=""
+  ask chosen "Type the device to FORMAT and use for data (e.g. ${candidates[0]}), or Enter to skip" ""
+  if [[ -z "$chosen" ]]; then
+    info "Skipped; data stays on the main disk."; mark_done disks; return 0
+  fi
+  local ok_choice=0 c
+  for c in "${candidates[@]}"; do [[ "$c" == "$chosen" ]] && ok_choice=1; done
+  ((ok_choice)) || die "'${chosen}' is not one of the empty disks listed; nothing was changed."
+
+  warn "ALL DATA on ${chosen} will be erased."
+  local again=""
+  ask again "Type the device name again to confirm" ""
+  [[ "$again" == "$chosen" ]] || die "Names did not match; nothing was changed."
+
+  mkfs.ext4 -q -L sakir-data "$chosen"
+  local uuid; uuid="$(blkid -o value -s UUID "$chosen")"
+  mkdir -p "$data"
+  # nofail: the server still boots if the disk is ever missing.
+  grep -q "$uuid" /etc/fstab || echo "UUID=${uuid} ${data} ext4 defaults,noatime,nofail 0 2" >> /etc/fstab
+  systemctl daemon-reload
+  mount "$data"
+  mountpoint -q "$data" || die "Mount of ${chosen} at ${data} failed; check /etc/fstab."
+  ok "${chosen} mounted at ${data} ($(df -h --output=size "$data" | tail -1 | tr -d ' '))"
+  mark_done disks
+}
+
+# =============================================================================
 # Step: layout  (copy the bundle to /opt/sakir-ai and create folders)
 # =============================================================================
 step_layout() {
@@ -351,6 +432,14 @@ step_secrets() {
   ask meta_page "Facebook Page ID" "$(env_get "$S/dt-assistant.env" META_PAGE_ID)"
   ask_secret meta_token "Facebook long-lived Page access token"
   ask ig_user "Instagram business account ID (optional)" "$(env_get "$S/dt-assistant.env" IG_USER_ID)"
+
+  # Optional outside monitor (healthchecks.io or similar): alerts you when the
+  # server stops pinging, e.g. it is down or the backup did not run.
+  local hc_hb hc_bk
+  ask hc_hb "Heartbeat ping URL, check period 5 min (optional)" "$(env_get "$ENVF" HC_HEARTBEAT_URL)"
+  ask hc_bk "Backup ping URL, check period 1 day (optional)" "$(env_get "$ENVF" HC_BACKUP_URL)"
+  env_set "$ENVF" HC_HEARTBEAT_URL "$hc_hb"
+  env_set "$ENVF" HC_BACKUP_URL "$hc_bk"
 
   # ---- Internal secrets (generated once, never shown) ----
   local ai_db_pw ro_pw n8n_db_pw n8n_key safe_token internal_token verify_token grafana_pw
@@ -589,11 +678,16 @@ step_hermes() {
 step_timers() {
   section "Scheduled jobs (systemd timers)"
   local unit
-  for unit in sakir-backup.service sakir-backup.timer sakir-index.service sakir-index.timer; do
+  for unit in sakir-backup.service sakir-backup.timer sakir-index.service sakir-index.timer \
+              sakir-heartbeat.service sakir-heartbeat.timer; do
     install -m 644 "${INSTALL_DIR}/systemd/${unit}" /etc/systemd/system/
   done
   systemctl daemon-reload
-  systemctl enable --now sakir-backup.timer sakir-index.timer
+  systemctl enable --now sakir-backup.timer sakir-index.timer sakir-heartbeat.timer
+
+  # Rotate the host log files written by the installer and scripts.
+  install -m 644 "${INSTALL_DIR}/config/logrotate-sakir-ai" /etc/logrotate.d/sakir-ai
+  logrotate --debug /etc/logrotate.d/sakir-ai >/dev/null 2>&1 || warn "logrotate config check failed"
 
   # Backup encryption key: public key on the server, private key with Sakir.
   if [[ ! -s /root/backup-recipient.txt ]]; then
@@ -620,6 +714,10 @@ step_timers() {
   if ! rclone listremotes 2>/dev/null | grep -q '^sakir-backup:'; then
     warn "Off-server copy not configured. Backups stay local until you run:"
     warn "  sudo rclone config   (create a remote named 'sakir-backup', e.g. Backblaze B2)"
+  fi
+  if [[ -z "$(env_get "${INSTALL_DIR}/.env" HC_HEARTBEAT_URL)" ]]; then
+    warn "No outside monitor yet: if this server goes down, nothing can tell you."
+    warn "Create two free checks at healthchecks.io (see README), then: install.sh --step secrets"
   fi
   ok "Timers: $(systemctl list-timers --no-legend 'sakir-*' | awk '{print $NF}' | tr '\n' ' ')"
 }
@@ -687,9 +785,9 @@ list_steps() {
 run_step() {
   local s="$1"
   "step_${s}"
-  # Steps that mark themselves (admin, tls, hermes, tailscale) only do so when
+  # Steps that mark themselves (admin, disks, tls, hermes, tailscale) only do so when
   # fully complete; the rest are marked here.
-  case "$s" in admin|tls|hermes|tailscale) ;; *) mark_done "$s" ;; esac
+  case "$s" in admin|disks|tls|hermes|tailscale) ;; *) mark_done "$s" ;; esac
 }
 
 main() {

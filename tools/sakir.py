@@ -13,7 +13,7 @@ Usage (python3 /opt/sakir-tools/sakir.py <group> <command> ...):
   server status                       containers and health
   server logs <container> [--tail N]  recent logs (max 500 lines)
   server errors                       error lines per container, last hour
-  server disk | ssl | nginx-test      host checks (waits for the result)
+  server disk | ssl | nginx-test | reboot-check   host checks (waits for the result)
   server restart <container> --reason "..."      safe: runs, Sakir is told
   server nginx-reload | ssl-renew --reason "..."  safe
   server reboot | poweroff | prune-images --reason "..."   risky: code to Sakir
@@ -146,7 +146,8 @@ def safe_run(action: str, args: dict | None = None, reason: str = "") -> object:
 def cmd_server(a: argparse.Namespace) -> None:
     c = a.command
     simple = {"status": "containers_status", "errors": "error_summary", "disk": "disk_usage",
-              "ssl": "ssl_expiry", "nginx-test": "nginx_test"}
+              "ssl": "ssl_expiry", "nginx-test": "nginx_test",
+              "reboot-check": "reboot_required"}
     reasoned = {"nginx-reload": "nginx_reload", "ssl-renew": "ssl_renew", "reboot": "reboot",
                 "poweroff": "poweroff", "prune-images": "prune_images"}
     if c in simple:

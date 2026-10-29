@@ -27,8 +27,15 @@ the plan from the blueprint; move them if needed and note why in DECISIONS.md.
 - [x] Hermes skills and `tools/sakir.py`
 - [x] Docs: architecture, decisions, operations
 - [x] AGENTS.md shared by Claude Code, Codex, Grok, Gemini; AI tools installer
+- [x] Hostname, backup-failure alerts, heartbeat, reboot check, log rotation, retention, second-disk step, CI
 
 ## Phase 1 — Foundation (Nov 2–8)
+- [ ] Telegram two-step verification; 2FA on GitHub, Meta, OpenRouter, email, VPS provider
+- [ ] Backup SSH key stored offline; provider web console tested
+- [ ] Weekly provider snapshot turned on
+- [ ] Privacy policy page published on datatechbd.com (docs/templates/privacy-policy.md)
+- [ ] healthchecks.io: heartbeat + backup checks with Telegram alerts; URLs added (`--step secrets`)
+- [ ] GitHub: protect `main` (Settings → Branches → add rule: require a pull request and the `ci` checks; block force pushes)
 - [ ] SSH key on laptop; DNS A record for the webhook domain
 - [ ] Start Meta business verification for Datatech BD Ltd. (slowest step — day 1)
 - [ ] Create Meta app, request permissions (README §1)
@@ -92,6 +99,7 @@ Start only after phases 1–6 run smoothly for a month.
 - [ ] Decide budget; update DECISIONS.md
 
 ## Native production stack for DT products (when DT Restora moves to this server)
+- [ ] Staging copy of each product (subdomain + separate database) to test updates before customers see them
 - [ ] Confirm versions: PHP ___, Laravel ___, database (MySQL ___ / PostgreSQL ___), Redis, Node ___
 - [ ] Installer step `prod`: PHP-FPM, database, Redis via apt; one system user, database and Nginx server block per product
 - [ ] systemd slice with higher CPU priority for production services

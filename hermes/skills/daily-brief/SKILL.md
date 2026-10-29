@@ -12,6 +12,7 @@ python3 $T sales inbox                # drafts waiting
 python3 $T server status              # containers
 python3 $T server errors              # error lines per container, last hour
 python3 $T server disk                # disk and memory
+python3 $T server reboot-check        # security updates waiting for a reboot?
 python3 $T content calendar --days 2  # posts today/tomorrow
 python3 $T sales spend                # model spend vs limit
 ```
@@ -20,7 +21,8 @@ python3 $T sales spend                # model spend vs limit
 Morning title: "Good morning — <weekday, date>". Evening: "Today in numbers".
 
 1. **Needs you** (only if any): drafts waiting (count, oldest age), failed posts,
-   unhealthy containers, disk over 80%, spend over 70% of limit, approvals pending.
+   unhealthy containers, disk over 80%, spend over 70% of limit, approvals pending,
+   reboot pending (suggest a quiet time, e.g. 04:00, and offer to start the reboot request).
 2. **Sales**: new leads, messages in, replies (auto/approved/edited), leads by stage.
 3. **Servers**: "All healthy" or the problems in one line each.
 4. **Content**: posts published / scheduled next.

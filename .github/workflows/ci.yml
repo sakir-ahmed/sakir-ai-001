@@ -1,0 +1,94 @@
+# =============================================================================
+# Sakir AI 001 — checks on every push and pull request
+#
+# Runs the same checks AGENTS.md asks every AI tool to run before committing:
+#   1. shell scripts: bash syntax + shellcheck
+#   2. Python: compiles; YAML files parse; skills have valid frontmatter
+#   3. compose.yml is valid (with stub secrets)
+#   4. dt-assistant tests against a real Postgres
+# With branch protection on `main` requiring this workflow, nothing broken can
+# be merged — whichever person or AI tool wrote it.
+# =============================================================================
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax and shellcheck
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q shellcheck
+          for f in install.sh lib/common.sh scripts/*.sh hostops/sakir-hostops db/ai-db-init/01-roles.sh; do
+            bash -n "$f"
+          done
+          shellcheck -x -S warning install.sh lib/common.sh scripts/*.sh hostops/sakir-hostops
+
+      - name: Python compiles, YAML parses, skills are valid
+        run: |
+          python3 -m py_compile $(git ls-files '*.py')
+          python3 - <<'EOF'
+          import glob, re, yaml
+          for f in glob.glob("**/*.y*ml", recursive=True):
+              yaml.safe_load(open(f, encoding="utf-8"))
+          for f in glob.glob("hermes/skills/*/SKILL.md"):
+              s = open(f, encoding="utf-8").read()
+              m = re.match(r"^---\nname: ([a-z0-9-]+)\ndescription: (.+?)\n---\n", s, re.S)
+              assert m and m.group(1) == f.split("/")[2], f"bad frontmatter: {f}"
+          print("yaml and skills ok")
+          EOF
+
+      - name: Customer-safety rule is intact
+        run: |
+          python3 - <<'EOF'
+          import yaml
+          cfg = yaml.safe_load(open("config/dt-assistant.yaml", encoding="utf-8"))
+          never = set(cfg["autonomy"]["never_auto"])
+          required = {"price", "discount", "order", "complaint", "legal", "other"}
+          assert required <= never, f"never_auto is missing {required - never}"
+          assert not (set(cfg["autonomy"]["auto_intents"]) & required), "a money/complaint intent is automatic"
+          print("never_auto ok")
+          EOF
+
+      - name: compose.yml is valid
+        run: |
+          mkdir -p secrets
+          for f in hermes dt-assistant ai-db n8n n8n-db safe-exec grafana; do echo "X=1" > "secrets/$f.env"; done
+          cp versions.env .env && echo "PUBLIC_DOMAIN=ci.example.com" >> .env
+          docker compose config --quiet
+          docker compose --profile jobs config --quiet
+
+  test-dt-assistant:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sakirai
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: sakirai_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sakirai" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: services/dt-assistant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+        env:
+          TEST_DATABASE_URL: postgresql://sakirai:ci@127.0.0.1:5432/sakirai_test

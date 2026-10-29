@@ -81,12 +81,14 @@ async def scheduler() -> None:
         "followup": int(s.get("followup", "check_every_minutes", default=30)) * 60,
         "stale": 600,
         "metrics": 60,
+        "retention": 86400,          # once a day (and once at start-up)
     }
     jobs = {
         "publisher": S.assistant.publisher_tick,
         "followup": S.assistant.followup_tick,
         "stale": S.assistant.stale_tick,
         "metrics": S.assistant.metrics_tick,
+        "retention": S.assistant.retention_tick,
     }
     last: dict[str, float] = {name: 0.0 for name in jobs}
     loop = asyncio.get_running_loop()

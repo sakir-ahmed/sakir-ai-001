@@ -143,3 +143,30 @@ public_ip() {
 
 # Runs docker compose from the install directory.
 dc() { (cd "$INSTALL_DIR" && docker compose "$@"); }
+
+# ---- Alerts ----------------------------------------------------------------------
+# notify_telegram "text" -> sends a message to Sakir with the @SakirAI_bot token
+# stored for safe-exec. Never fails the caller (alerts must not break scripts).
+notify_telegram() {
+  local f="${INSTALL_DIR}/secrets/safe-exec.env" token owner
+  token="$(env_get "$f" TELEGRAM_BOT_TOKEN)"
+  owner="$(env_get "$f" TELEGRAM_OWNER_ID)"
+  [[ -n "$token" && -n "$owner" ]] || { warn "Telegram not configured; alert not sent: $1"; return 0; }
+  # The token goes in the URL; curl reads it from stdin config so it never shows in `ps`.
+  printf 'url = "https://api.telegram.org/bot%s/sendMessage"\n' "$token" \
+    | curl -fsS --max-time 15 -K - \
+        --data-urlencode "chat_id=${owner}" \
+        --data-urlencode "text=[$(hostname)] $1" >/dev/null 2>&1 \
+    || warn "Telegram alert failed: $1"
+  return 0
+}
+
+# hc_ping KEY [suffix] -> pings an optional Healthchecks.io-style URL stored in
+# .env under KEY (e.g. HC_BACKUP_URL). suffix: "" = success, "/start", "/fail".
+# Outside monitors alert Sakir when an expected ping does NOT arrive, which also
+# covers "the whole server is down" (something an on-server monitor cannot report).
+hc_ping() {
+  local url; url="$(env_get "${INSTALL_DIR}/.env" "$1")"
+  [[ -n "$url" ]] || return 0
+  curl -fsS --max-time 10 --retry 3 -o /dev/null "${url}${2:-}" || true
+}

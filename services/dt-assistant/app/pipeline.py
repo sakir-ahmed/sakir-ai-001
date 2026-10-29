@@ -14,6 +14,7 @@ Scheduled jobs (started from main.py):
   stale_tick      warn about old drafts; expire drafts whose window closed
   publisher_tick  publish approved posts from content_calendar
   metrics_tick    daily snapshot for Hermes' evening summary
+  retention_tick  daily deletion of old messages, drafts and dead leads
 """
 from __future__ import annotations
 
@@ -455,3 +456,12 @@ class Assistant:
             self._last_metrics_day = today
             await self.db.save_metrics(now.date(), await self.db.summary(1))
             log.info("daily metrics saved for %s", today)
+
+    async def retention_tick(self) -> None:
+        """Delete data older than the retention periods in dt-assistant.yaml."""
+        cfg = self.settings.get("retention", default={}) or {}
+        removed = await self.db.purge_old(int(cfg.get("messages_days", 365)),
+                                          int(cfg.get("approvals_days", 180)),
+                                          int(cfg.get("inactive_leads_days", 365)))
+        if any(removed.values()):
+            log.info("retention: removed %s", removed)

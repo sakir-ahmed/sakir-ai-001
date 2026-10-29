@@ -1,0 +1,8 @@
+# Sakir AI 001 — ping the outside monitor when the core is healthy (see scripts/heartbeat.sh).
+[Unit]
+Description=Sakir AI heartbeat to the outside monitor
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/sakir-ai/scripts/heartbeat.sh

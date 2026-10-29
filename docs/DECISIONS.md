@@ -5,6 +5,26 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-014 · Alerts that reach Sakir even when the server cannot
+**Date:** 2026-10-29
+**Context:** Uptime Kuma runs on the same server, so a dead server could not alert anyone;
+backup failures were only written to a log; pending security reboots went unnoticed.
+**Decision:**
+- Backup failures send a Telegram message (`notify_telegram` in `lib/common.sh`).
+- Optional outside monitor (healthchecks.io or any compatible service): a 5-minute heartbeat
+  (`sakir-heartbeat.timer`, which also reports unhealthy core services) and start/success/fail
+  pings from every backup. A missing ping = server down or backup not run.
+- `reboot_required` is a read action for Hermes; health check and morning brief show it.
+- Host log files rotate weekly (`/etc/logrotate.d/sakir-ai`).
+- Customer data retention runs daily in dt-assistant (`retention:` in `dt-assistant.yaml`;
+  default 12 months for messages and dead leads, 6 months for decided drafts), matching the
+  privacy policy template Meta review requires.
+- Optional `disks` step mounts an empty second disk (e.g. NVMe) at `data/`.
+- GitHub Actions `ci` runs the AGENTS.md checks on every push, including a check that money
+  and complaint intents can never be automatic; `main` should be protected to require it.
+**Consequence:** Two free outside checks to create; deletions of old customer data are
+automatic and permanent (backups keep them 14 more days).
+
 ## D-013 · DT products run natively on the host; Sakir AI stays in Docker; hostname sakir-ai-001
 **Date:** 2026-10-29
 **Context:** Sakir prefers DT production apps (DT Restora and later products) to run directly on

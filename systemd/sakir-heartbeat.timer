@@ -1,0 +1,10 @@
+# Sakir AI 001 — heartbeat every 5 minutes (set the check period to 5 min, grace 10 min).
+[Unit]
+Description=Sakir AI heartbeat every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target

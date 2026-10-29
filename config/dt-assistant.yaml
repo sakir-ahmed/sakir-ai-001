@@ -70,5 +70,12 @@ holding_reply:
   banglish: "Dhonnobad! Amader team khub shighroi apnake reply dibe."
   en: "Thank you! Our team will reply to you very shortly."
 
+# ---- Data retention (privacy; keep in line with the published privacy policy) ----
+# Runs once a day. Set a value to 0 to keep that data forever.
+retention:
+  messages_days: 365        # delete customer message text older than this
+  approvals_days: 180       # delete decided drafts (sent/rejected/expired) older than this
+  inactive_leads_days: 365  # delete leads still at stage new/lost with no message for this long
+
 # ---- Schedules (Asia/Dhaka) ----
 daily_metrics_time: "21:00"

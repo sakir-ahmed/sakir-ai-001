@@ -224,3 +224,20 @@ async def test_summary_and_commands(env):
     assert "Messages in: 1" in await env.assistant.on_command("stats", "")
     assert "Paused" in await env.assistant.on_command("pause", "")
     assert await env.db.get_setting("paused") is True
+
+
+async def test_retention_removes_only_old_data(env):
+    await env.assistant.handle_event(dm("m1", "dam koto?", user="OLD"))
+    await env.assistant.on_button("reject", 1)
+    await env.assistant.handle_event(dm("m2", "demo chai", user="NEW"))
+    old = datetime.now(timezone.utc) - timedelta(days=400)
+    await env.db.p.execute("UPDATE messages SET created_at = $1 WHERE meta_id = 'm1'", old)
+    await env.db.p.execute("UPDATE approvals SET decided_at = $1 WHERE id = 1", old)
+    await env.db.p.execute("UPDATE leads SET stage = 'lost', last_inbound_at = $1 WHERE channel_user_id = 'OLD'", old)
+    await env.assistant.retention_tick()
+    assert await env.db.p.fetchval("SELECT count(*) FROM leads") == 1          # NEW kept
+    assert await env.db.p.fetchval("SELECT count(*) FROM messages WHERE meta_id = 'm2'") == 1
+    assert await env.db.p.fetchval("SELECT count(*) FROM approvals WHERE status = 'waiting'") == 1
+    removed = await env.db.purge_old(0, 0, 0)                                  # 0 = keep forever
+    assert removed == {"messages": 0, "approvals": 0, "leads": 0}
+

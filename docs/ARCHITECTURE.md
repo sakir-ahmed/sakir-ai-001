@@ -185,6 +185,8 @@ That leaves about 3 vCPU and 29 GB of the 12 vCPU / 48 GB server for DT products
 | 02:30 | knowledge re-index | systemd `sakir-index.timer` |
 | 03:00 | encrypted backup | systemd `sakir-backup.timer` |
 | 08:30 / 21:30 | morning brief / evening summary | Hermes schedule (set after install) |
+| every 5 min | heartbeat to the outside monitor (if configured) | systemd `sakir-heartbeat.timer` |
+| daily | delete messages/drafts/dead leads past retention | dt-assistant |
 | 21:00 | daily metrics snapshot | dt-assistant |
 | Mon 10:00 | job scan | Hermes schedule |
 | Tue, Fri 11:00 | LinkedIn drafts | Hermes schedule |

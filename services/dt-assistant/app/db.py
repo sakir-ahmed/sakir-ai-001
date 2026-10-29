@@ -242,6 +242,31 @@ class Database:
                GROUP BY purpose ORDER BY usd DESC"""
         )
 
+    # ---- retention -------------------------------------------------------------
+    async def purge_old(self, messages_days: int, approvals_days: int, leads_days: int) -> dict[str, int]:
+        """Delete data older than the retention periods (0 = keep). Returns counts."""
+        out = {"messages": 0, "approvals": 0, "leads": 0}
+
+        def count(status: str) -> int:          # asyncpg returns e.g. "DELETE 12"
+            return int(status.split()[-1])
+
+        async with self.p.acquire() as conn, conn.transaction():
+            if leads_days > 0:
+                out["leads"] = count(await conn.execute(
+                    """DELETE FROM leads WHERE stage IN ('new', 'lost')
+                       AND COALESCE(last_inbound_at, created_at) < now() - make_interval(days => $1)""",
+                    leads_days))
+            if approvals_days > 0:
+                out["approvals"] = count(await conn.execute(
+                    """DELETE FROM approvals WHERE status IN ('sent', 'rejected', 'expired', 'failed')
+                       AND COALESCE(decided_at, created_at) < now() - make_interval(days => $1)""",
+                    approvals_days))
+            if messages_days > 0:
+                out["messages"] = count(await conn.execute(
+                    "DELETE FROM messages WHERE created_at < now() - make_interval(days => $1)",
+                    messages_days))
+        return out
+
     # ---- metrics ---------------------------------------------------------------
     async def summary(self, days: int = 1) -> dict[str, Any]:
         since = datetime.now(timezone.utc) - timedelta(days=days)

@@ -17,6 +17,7 @@ commands against the host.
 | Disk and memory | `server disk` |
 | SSL certificates | `server ssl` |
 | Nginx config test | `server nginx-test` |
+| Reboot pending after updates? | `server reboot-check` |
 
 ## Fix (safe: runs immediately, Sakir is notified)
 - Restart one container: `server restart <name> --reason "<why>"`

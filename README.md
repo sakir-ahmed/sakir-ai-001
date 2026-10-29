@@ -56,6 +56,21 @@ with `sudo bash /opt/sakir-ai/install.sh --step secrets`.
 | 7 | **Meta app** | developers.facebook.com → Business app → add Messenger + Webhooks; business verification of Datatech BD Ltd. | Facebook/Instagram replies and posting |
 | 8 | Meta **App Secret**, **Page ID**, long-lived **Page token** | App settings → Basic; Graph API Explorer | same |
 | 9 | Instagram business account ID (optional) | Linked to the Facebook Page | Instagram DMs and posts |
+| 10 | **Privacy policy page** on datatechbd.com | Fill [docs/templates/privacy-policy.md](docs/templates/privacy-policy.md) and publish it | Required by Meta app review |
+| 11 | Two free **outside monitor** checks (optional, recommended) | healthchecks.io → new check "sakir-ai heartbeat" (period 5 min, grace 10 min) and "sakir-ai backup" (period 1 day, grace 2 h); add a Telegram integration | Alerts when the server is down or a backup did not run |
+
+### Protect your accounts first
+Telegram is now the remote control of your server, so secure these before installing:
+- **Telegram:** Settings → Privacy and Security → **Two-Step Verification** (password + recovery email).
+  Check Active Sessions and log out devices you don't use.
+- **2FA** (authenticator app, not SMS) on GitHub, Meta (Facebook) Business, OpenRouter, your email,
+  and your VPS provider account.
+- **A second way into the server:** add a backup SSH key kept offline
+  (`ssh-keygen -t ed25519 -f ~/.ssh/sakir-backup`, append the `.pub` to the server's
+  `~/.ssh/authorized_keys`), and confirm you can open the provider's web console.
+- **Provider snapshots:** turn on the weekly automatic snapshot in the VPS panel (your plan
+  includes 3); it is a whole-server rollback on top of the nightly backups.
+- **Password manager** for the backup private key, bot tokens and API keys.
 
 Meta permissions to request: `pages_messaging`, `pages_read_engagement`,
 `pages_manage_metadata`, `pages_read_user_content`, `pages_manage_engagement`,
@@ -117,6 +132,9 @@ sudo bash install.sh --step aitools      # add Claude Code / Codex / Grok / Gemi
    `cd /opt/sakir-ai/knowledge && git remote add origin git@github.com:<you>/sakir-knowledge.git && git push -u origin main`
 6. **Off-server backups**: `sudo rclone config` → create a remote named
    `sakir-backup` (Backblaze B2 or S3). Then `sakir-ai backup` and check it uploaded.
+   **Outside monitor**: if you created the two healthchecks.io checks, run
+   `sudo bash /opt/sakir-ai/install.sh --step secrets`, paste both ping URLs, then
+   `sudo systemctl start sakir-heartbeat` and see the heartbeat check turn green.
 7. **Hermes schedules** — send @SakirAI_bot:
    - "Every day at 08:30 run the daily-brief skill (morning)."
    - "Every day at 21:30 run the daily-brief skill (evening)."
@@ -228,6 +246,7 @@ then `sakir-ai restart dt-assistant`.
 | stt unhealthy | first start downloads ~2 GB; `sakir-ai logs stt` |
 | Hermes silent | `sakir-ai logs hermes`; Telegram user ID in `data/hermes/.env` (`TELEGRAM_ALLOWED_USERS`) |
 | Disk filling | `sakir-ai status`, `ncdu /opt/sakir-ai/data` |
+| "reboot pending" in health/brief | security updates installed; ask Hermes to reboot at a quiet hour (code required) |
 | Restore needed | on your laptop: `scripts/restore-test.sh <backup> <key>` shows the data; restore = fresh install + copy `data/` from `files.tgz` + load the SQL dumps |
 
 ## 8. Developer notes

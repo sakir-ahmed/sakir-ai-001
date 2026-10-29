@@ -14,6 +14,9 @@
 #             The private key is NOT on this server (Sakir keeps it).
 # Off-server: copied with rclone to the remote "sakir-backup" if configured.
 # Retention:  14 days locally; set lifecycle rules on the bucket for remote.
+# Alerts:     any failure sends Sakir a Telegram message; optional HC_BACKUP_URL
+#             (Healthchecks.io) gets start/success/fail pings, so a backup that
+#             never runs (server down, timer broken) is reported too.
 # =============================================================================
 set -Eeuo pipefail
 
@@ -26,7 +29,18 @@ KEEP_DAYS="${KEEP_DAYS:-14}"
 RECIPIENT=/root/backup-recipient.txt
 
 require_root
-[[ -s "$RECIPIENT" ]] || die "No backup public key at $RECIPIENT (run install.sh --step timers)."
+
+# Any failure from here on: tell Sakir, mark the run failed, exit non-zero.
+on_failure() {
+  local line="$1"
+  error "Backup failed at line ${line}"
+  hc_ping HC_BACKUP_URL /fail
+  notify_telegram "BACKUP FAILED at line ${line}. Check: sudo tail -50 ${LOG_FILE}"
+}
+trap 'on_failure $LINENO' ERR
+hc_ping HC_BACKUP_URL /start
+
+[[ -s "$RECIPIENT" ]] || { on_failure "$LINENO (no public key at $RECIPIENT; run install.sh --step timers)"; exit 1; }
 
 cd "$INSTALL_DIR"
 DAY="$(date +%F_%H%M)"
@@ -71,7 +85,8 @@ ok "Encrypted archive: ${OUT} ($(du -h "$OUT" | cut -f1))"
 
 # ---- Off-server copy ----
 if rclone listremotes 2>/dev/null | grep -q '^sakir-backup:'; then
-  rclone copy "$OUT" "sakir-backup:sakir-ai-backups/" --quiet && ok "Copied off-server"
+  rclone copy "$OUT" "sakir-backup:sakir-ai-backups/" --quiet
+  ok "Copied off-server"
 else
   warn "No rclone remote 'sakir-backup': backup is ONLY on this server."
 fi
@@ -79,3 +94,4 @@ fi
 # ---- Local retention ----
 find "${INSTALL_DIR}/backups" -maxdepth 1 -name 'sakir-ai_*.tar.age' -mtime +"$KEEP_DAYS" -delete
 ok "Backup finished"
+hc_ping HC_BACKUP_URL

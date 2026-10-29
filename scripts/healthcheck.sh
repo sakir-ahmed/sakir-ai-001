@@ -49,7 +49,16 @@ echo "Host"
 systemctl is-active --quiet nginx && pass "nginx active" || fail "nginx not active"
 systemctl is-active --quiet sakir-hostops.path && pass "hostops watcher active" || fail "hostops watcher not active"
 systemctl is-active --quiet sakir-backup.timer && pass "backup timer active" || wrn "backup timer not active (run --step timers)"
+systemctl is-active --quiet sakir-heartbeat.timer && pass "heartbeat timer active" || wrn "heartbeat timer not active (run --step timers)"
 ufw status | grep -q "Status: active" && pass "firewall active" || fail "firewall inactive"
+
+if [[ -f /var/run/reboot-required ]]; then
+  wrn "reboot pending for security updates ($(sort -u /var/run/reboot-required.pkgs 2>/dev/null | head -3 | tr '\n' ' ')) — ask Hermes to reboot in a quiet hour"
+else
+  pass "no reboot pending"
+fi
+[[ -n "$(env_get .env HC_HEARTBEAT_URL)" ]] && pass "outside heartbeat monitor configured" \
+  || wrn "no outside monitor: a dead server cannot alert you (README: outside monitor)"
 
 disk_pct="$(df --output=pcent / | tail -1 | tr -dc '0-9')"
 (( disk_pct < 80 )) && pass "disk ${disk_pct}% used" || wrn "disk ${disk_pct}% used"
