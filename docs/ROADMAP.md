@@ -41,15 +41,33 @@ session's own terminal output, not assumed:
 - [x] Backup encryption key generated and saved by Sakir (typed `saved`)
 - [x] Firewall, Docker, all containers up; Nginx serving `ai.datatechbd.com` (not yet reachable —
       DNS, below)
-Needs a check against the server before ticking the matching Phase 1/2 items above (ask Claude
-to run the Phase-1 diagnostic and update this file — it cannot SSH in on its own):
-- [ ] `tailscale` step finished (was stuck on the login link expiring once already)
-- [ ] `aitools`, `verify` steps
-- [ ] DNS for `ai.datatechbd.com` → `13.140.252.169` (was still pointing elsewhere as of the
-      last check) — then `sudo bash install.sh --step tls`
-- [ ] `rclone` off-server backup remote configured (was not, as of the last check)
+**2026-10-30, later the same day** — `sakir-ai health` and a few commands run directly on the
+server (Sakir pasted the output; Claude still cannot SSH in on its own). Confirmed:
+- [x] `tailscale` step finished — server shows up in `tailscale status` (`100.105.238.124`)
+- [ ] `aitools`, `verify` steps — not checked yet
+- [ ] DNS for `ai.datatechbd.com` still wrong: it resolves to Cloudflare's edge IPs
+      (`104.21.17.209` / `172.67.178.79`), not the server's `13.140.252.169` — likely why
+      `sakir-ai health` shows the webhook answering HTTP 404. **Fix:** in wherever
+      `datatechbd.com`'s DNS is managed (Cloudflare, by the look of those IPs), point the `ai`
+      A record straight at `13.140.252.169` with the proxy **off** ("DNS only" / grey cloud,
+      not orange) — Let's Encrypt and the Meta webhook both need to reach the server directly.
+      Then `sudo bash install.sh --step tls`.
+- [ ] `rclone` off-server backup remote: still not configured (confirmed: config file not found)
+- **New, found by this check — not in any earlier plan:**
+  - [ ] **stt container is unhealthy** (`sakir-ai health` FAIL). Needs
+        `sakir-ai logs stt` to see why (still downloading its ~2 GB model, or a real crash).
+  - [ ] **No backup has run yet**, though the timer has been active since the install
+        (`sakir-ai health` WARN "no backup in the last 25 hours") and 03:00 has already passed
+        once. Needs `sudo systemctl status sakir-backup.timer sakir-backup.service` and
+        `sudo journalctl -u sakir-backup -n 50 --no-pager` to find out why, then
+        `sakir-ai backup` to run one now regardless.
+  - [ ] **The admin user `sakir` has no git clone of this repo** — only `/root/sakir-ai-001`
+        exists, so `cd ~/sakir-ai-001` as `sakir` (as the docs assume) fails. Fix:
+        `git clone https://github.com/sakir-ahmed/sakir-ai-001 ~/sakir-ai-001` while logged in
+        as `sakir`.
 - [ ] Settings page password saved in the password manager (shown once, same as the backup key)
 - [ ] `knowledge/products/dt-restora/pricing.md` and other knowledge TODOs filled in
+      (confirmed still open by `sakir-ai health`)
 
 ## Phase 1 — Foundation (Nov 2–8)
 - [ ] Telegram two-step verification; 2FA on GitHub, Meta, OpenRouter, email, VPS provider
