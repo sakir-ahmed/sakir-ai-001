@@ -1,20 +1,23 @@
 # Roadmap and progress
 
-Tick items as they are done (edit this file on GitHub or in your clone). Dates are
-the plan from the blueprint; move them if needed and note why in DECISIONS.md.
+Track repository implementation separately from operator verification. Dates below
+are original blueprint targets, not current completion promises. Dated session
+notes remain historical evidence, not a fresh server health check. The expanded
+vision and evidence-gated phases are in [VISION.md](VISION.md),
+[CAPABILITIES.md](CAPABILITIES.md) and [DELIVERY.md](DELIVERY.md).
 
 ## Status
 
 | Phase | Planned | Status |
 | --- | --- | --- |
 | 0 Build the installer | Oct 2026 | Done — this repo |
-| 1 Foundation | Nov 2–8 | Not started |
-| 2 Command center | Nov 9–22 | Not started |
-| 3 Sales agent (drafts) | Nov 16 – Dec 6 | Not started |
+| 1 Foundation | Nov 2–8 | Partial — installation reported Oct 30; health/backup gaps open |
+| 2 Command center | Nov 9–22 | Partial — dashboard code; Hermes reachability reported; acceptance open |
+| 3 Sales agent (drafts) | Nov 16 – Dec 6 | Code foundation; live channel acceptance unverified |
 | Gate: FAQ replies automatic | Dec 7 | — |
-| 4 Content factory | Dec 7–20 | Not started |
-| 5 DevOps watcher | Dec 21–27 | Not started |
-| 6 Career and branding | Dec 28 – Jan 10 | Not started |
+| 4 Content factory | Dec 7–20 | Draft skill/publisher foundation; full media pack unverified |
+| 5 DevOps watcher | Dec 21–27 | Code foundation; operational acceptance open |
+| 6 Career and branding | Dec 28 – Jan 10 | Skills present; outcome acceptance open |
 | 7 Live voice/video calls | Feb 2027 → | Planning |
 | 8 More DT products | 2027 | Planning |
 
@@ -32,7 +35,7 @@ the plan from the blueprint; move them if needed and note why in DECISIONS.md.
       first written, which is itself the kind of planning/implementation gap this file exists to
       catch — see "Session notes" below
 
-## Session notes (dated; delete once folded into the checklists above)
+## Session notes (retain dated evidence)
 
 **2026-10-30** — first real install, done together over several rounds. Confirmed from the
 session's own terminal output, not assumed:
@@ -81,8 +84,8 @@ server (Sakir pasted the output; Claude still cannot SSH in on its own). Confirm
 - [ ] Create Meta app, request permissions (README §1)
 - [ ] Create @SakirAI_bot and @DTSalesDesk_bot; note Telegram user ID
 - [ ] OpenRouter: $40 credit, keys `hermes-core` ($12) and `sales` ($26)
-- [ ] Run `sudo bash install.sh` on the server
-- [ ] Save the backup private key in the password manager
+- [x] Run `sudo bash install.sh` on the server — reported 2026-10-30; health gaps below remain
+- [x] Backup private key saved by Sakir — reported 2026-10-30; storage location not independently verified
 - [ ] Optional: AI coding tools (`--step aitools`); log in to each once (docs/AI-TOOLS.md)
 - [ ] Set @SakirAI_bot display name to "Sakir AI 001" in @BotFather
 - [ ] Configure rclone remote `sakir-backup`; confirm a backup uploads
@@ -94,7 +97,8 @@ server (Sakir pasted the output; Claude still cannot SSH in on its own). Confirm
 ## Phase 2 — Command center (Nov 9–22)
 - [x] Dashboard page (`/`): system flow diagram, container health, sales pipeline, spend,
       backup age, at `http://127.0.0.1:8090` over Tailscale/SSH tunnel (docs/OPERATIONS.md)
-- [ ] Hermes answers on Telegram; stranger gets no reply
+- [x] Hermes answers on Telegram — reported 2026-10-30
+- [ ] Stranger access rejection independently tested
 - [ ] 10 Bangla + 10 English voice notes, at least 18 understood (pick `small` or `large` model)
 - [ ] Hermes schedules set (README §3 step 7)
 - [ ] Morning and evening briefs arrive 7 days in a row
@@ -163,3 +167,18 @@ For each new product (Propix, Salona, Delivo, Pharmo, Garagio, Factora):
 | 2026-11 | | | | | |
 | 2026-12 | | | | | |
 | 2027-01 | | | | | |
+
+## Expanded vision delivery tracking
+
+Documentation now covers C01–C18 in CAPABILITIES.md. These unchecked items are
+implementation gates, not claims of completed features:
+
+- [ ] A: current foundation health, off-site backup and restore verified
+- [ ] B: existing workflows accepted with delivery and spend evidence
+- [ ] C: research and finished media production accepted
+- [ ] D: additional channels, CRM/support and analytics accepted
+- [ ] E: durable coordination and isolated multi-project development accepted
+- [ ] F: advertising dry run, cap and stop controls accepted
+- [ ] G: private live media pilot accepted
+
+See DELIVERY.md for dependencies; original phase checklists remain in force.

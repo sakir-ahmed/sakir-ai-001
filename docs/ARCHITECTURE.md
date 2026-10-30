@@ -4,6 +4,14 @@ This describes the system the code in this repo actually installs. The original
 plan is in [`Sakir AI 001 — Build Blueprint.md`](../Sakir%20AI%20001%20%E2%80%94%20Build%20Blueprint.md);
 where the two differ, this file is correct and [DECISIONS.md](DECISIONS.md) says why.
 
+## Evidence and scope
+
+This describes repository implementation, not proof that every deployed service
+is healthy or every account is configured. See [ROADMAP.md](ROADMAP.md) for dated
+operator reports and [CAPABILITIES.md](CAPABILITIES.md) for the full vision and
+remaining gaps. Future designs are in [DELIVERY.md](DELIVERY.md). A skill describes
+agent behavior; it does not prove an autonomous workflow has run successfully.
+
 ## At a glance
 
 ```mermaid
@@ -132,7 +140,9 @@ sequenceDiagram
     Runner->>Runner: action on its own fixed list → systemctl reboot
 ```
 
-Hermes never sees the code, so a prompt injection cannot approve anything.
+The code is sent directly to Sakir, not returned in the action request response.
+Sakir relays it through Hermes for confirmation; this is a human approval boundary,
+not a guarantee that Hermes can never observe the code.
 Three wrong codes or 10 minutes cancel the request; a safe-exec restart
 cancels all pending requests.
 
@@ -169,7 +179,7 @@ That leaves about 3 vCPU and 29 GB of the 12 vCPU / 48 GB server for DT products
 | Leads, messages, approvals, calendar, spend | `data/ai-db` | nightly SQL dump |
 | n8n workflows and credentials | `data/n8n-db`, `data/n8n` | nightly SQL dump |
 | Hermes memory, skills, sessions, config | `data/hermes` | nightly (files) |
-| Knowledge (source of truth) | `knowledge/` (Git) | nightly (files) + your Git remote |
+| Knowledge (source of truth) | live `/opt/sakir-ai/knowledge/`, seeded from `knowledge-templates/` | nightly (files); separate Git versioning only if configured |
 | Search index | `data/qdrant` | not needed (rebuilt by `sakir-ai reindex`) |
 | Speech models | `data/models` | not needed (re-downloaded) |
 | Secrets | `secrets/`, `.env` | nightly (inside the encrypted archive) |
