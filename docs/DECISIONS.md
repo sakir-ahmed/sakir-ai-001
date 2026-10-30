@@ -5,6 +5,21 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-016 · Backup completion requires successful encryption and every product dump
+**Date:** 2026-10-31
+**Context:** The live nightly backup failed on GNU tar's status 1 when Grafana
+changed during archiving. Review also found failed product hooks were ignored and
+encryption wrote directly to a filename used by the freshness health check.
+**Decision:** Serialize backups with flock, use private temporary files, treat tar
+status 1 as a visible live-file consistency warning, and retain fatal errors as
+failures. Every product hook must succeed. Encrypt inside the working directory
+and publish the final archive by rename only after encryption succeeds.
+**Consequence:** A partial encrypted output no longer appears fresh/complete.
+Postgres dumps remain consistent; the live file archive is not a guarantee of
+application-consistent SQLite state. Snapshotting, remote verification and restore
+acceptance remain open in PROGRESS.md. This change does not alter owner approvals,
+credentials, destinations or retention.
+
 ## D-015 · A web edit form for Sakir's own settings; Hermes' setup wizard dropped
 **Date:** 2026-10-29
 **Context:** The first real install stalled inside `docker compose run --rm hermes setup`

@@ -6,6 +6,9 @@ notes remain historical evidence, not a fresh server health check. The expanded
 vision and evidence-gated phases are in [VISION.md](VISION.md),
 [CAPABILITIES.md](CAPABILITIES.md) and [DELIVERY.md](DELIVERY.md).
 
+Active execution tracking: [PROGRESS.md](PROGRESS.md). Use its nested tasks for
+current work; this roadmap retains the original phase history.
+
 ## Status
 
 | Phase | Planned | Status |

@@ -166,6 +166,15 @@ sudo bash install.sh --step layout     # copies new code to /opt/sakir-ai (never
 sudo bash install.sh --step stack      # rebuilds and restarts
 ```
 
+## Backup completion and progress
+
+Track active recovery work in [PROGRESS.md](PROGRESS.md). Concurrent backups are
+rejected. Fatal archive errors, failed product dump hooks and encryption failures
+fail the run; incomplete encrypted output never becomes a final backup filename.
+GNU tar status 1 logs a warning because live files changed. Such a backup still
+needs a restore drill and is not an application-consistent SQLite snapshot.
+Local success without an off-site copy is not disaster-recovery completion.
+
 ## Restore
 
 ### Test (monthly, on your laptop)
