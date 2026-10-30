@@ -21,7 +21,7 @@ Scope: read-only live audit plus repository evidence. No percentage is claimed.
   - [x] Add six isolated regression cases and run them successfully
   - [ ] Merge reviewed fix into main
   - [x] Deploy backup script without changing secrets or other services — targeted script replacement; rollback copy retained
-  - [ ] Run live backup and verify completed encrypted archive
+  - [x] Run live backup and verify completed encrypted archive — 2026-10-31 02:35 Dhaka, `sakir-ai_2026-10-31_023444.tar.age`, 167 MB; live-file consistency warning retained
   - [ ] Next scheduled timer run succeeds
   - [ ] Application-consistent SQLite snapshots for live state (current tar warning is not this guarantee)
 - [ ] R2 Off-site copy and recovery proof
@@ -114,3 +114,5 @@ or external publishing merely by checking a documentation task.
 | --- | --- | --- | --- |
 | 2026-10-31 | Audit | Termius health, database counts and redacted service logs | No new business workflow acceptance established |
 | 2026-10-31 | R1 local tests | `python3 -m unittest discover -s tests -v`: 6 passed | Live deployment, backup, remote copy and restore |
+
+| 2026-10-31 02:35 | R1 live backup | `Backup finished`; 167 MB encrypted local archive after targeted deployment of 5321a12 | Off-site destination missing; restore and SQLite consistency remain open |
