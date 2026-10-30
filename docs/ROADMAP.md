@@ -28,6 +28,28 @@ the plan from the blueprint; move them if needed and note why in DECISIONS.md.
 - [x] Docs: architecture, decisions, operations
 - [x] AGENTS.md shared by Claude Code, Codex, Grok, Gemini; AI tools installer
 - [x] Hostname, backup-failure alerts, heartbeat, reboot check, log rotation, retention, second-disk step, CI
+- [x] settings-ui: dashboard (`/`) + edit form (`/settings`) — D-015; was built after this list was
+      first written, which is itself the kind of planning/implementation gap this file exists to
+      catch — see "Session notes" below
+
+## Session notes (dated; delete once folded into the checklists above)
+
+**2026-10-30** — first real install, done together over several rounds. Confirmed from the
+session's own terminal output, not assumed:
+- [x] `sudo bash install.sh` run on the server; hostname `sakir-ai-001` set
+- [x] Hermes running and reachable on Telegram (`@SakirAI_bot`)
+- [x] Backup encryption key generated and saved by Sakir (typed `saved`)
+- [x] Firewall, Docker, all containers up; Nginx serving `ai.datatechbd.com` (not yet reachable —
+      DNS, below)
+Needs a check against the server before ticking the matching Phase 1/2 items above (ask Claude
+to run the Phase-1 diagnostic and update this file — it cannot SSH in on its own):
+- [ ] `tailscale` step finished (was stuck on the login link expiring once already)
+- [ ] `aitools`, `verify` steps
+- [ ] DNS for `ai.datatechbd.com` → `13.140.252.169` (was still pointing elsewhere as of the
+      last check) — then `sudo bash install.sh --step tls`
+- [ ] `rclone` off-server backup remote configured (was not, as of the last check)
+- [ ] Settings page password saved in the password manager (shown once, same as the backup key)
+- [ ] `knowledge/products/dt-restora/pricing.md` and other knowledge TODOs filled in
 
 ## Phase 1 — Foundation (Nov 2–8)
 - [ ] Telegram two-step verification; 2FA on GitHub, Meta, OpenRouter, email, VPS provider
@@ -52,6 +74,8 @@ the plan from the blueprint; move them if needed and note why in DECISIONS.md.
 - [ ] Fill DT Restora `features.md`, `pricing.md`, `faq.md`
 
 ## Phase 2 — Command center (Nov 9–22)
+- [x] Dashboard page (`/`): system flow diagram, container health, sales pipeline, spend,
+      backup age, at `http://127.0.0.1:8090` over Tailscale/SSH tunnel (docs/OPERATIONS.md)
 - [ ] Hermes answers on Telegram; stranger gets no reply
 - [ ] 10 Bangla + 10 English voice notes, at least 18 understood (pick `small` or `large` model)
 - [ ] Hermes schedules set (README §3 step 7)
