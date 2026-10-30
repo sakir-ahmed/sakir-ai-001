@@ -52,8 +52,8 @@ complete a business or personal workflow.
   - [x] Check sales key: provider-side $10 limit; no top-up performed
   - [x] Prepare merge helper and reusable Hermes policy without replacing live settings
   - [x] Build tested sales image on server after fresh backup (source 06d5b68; running service unchanged)
-  - [ ] Activate new sales image and verify live free-first/fallback routing
-  - [ ] Owner approves sales container recreation for the new code
+  - [x] Activate new sales image and verify active policy/free inference — 2026-10-31 03:22 Dhaka, nonempty synthetic response, incremental cost 0; paid fallback verified with mocked HTTP only
+  - [x] Owner explicitly approved sales container recreation for new code; only dt-assistant recreated
   - [ ] Privately provision a capped Hermes OpenRouter key (none available in audit)
   - [ ] Activate/verify Hermes free-first policy and existing-chat model
   - [ ] Evaluate multilingual quality before increasing autonomy
@@ -155,3 +155,5 @@ or external publishing merely by checking a documentation task.
 | 2026-10-31 02:53 | S1 public route | Dedicated ai001.sakir.bd Nginx site; Lets Encrypt certificate expires 2027-01-28; origin and Cloudflare invalid-token probes return 403 | Meta callback subscription and actual message/approval/delivery still unverified |
 
 | 2026-10-31 02:57 | S1 runtime refresh | Owner-approved recreation of dt-assistant/n8n only; active hostname checks all true; both health endpoints pass; independent public HTTP 403 + JSON assertions pass | Existing STT unhealthy and pricing TODOs remain; Meta customer round trip still open |
+
+| 2026-10-31 03:22 | C0 sales activation | Active free-first code/config verified; deployed free-only synthetic call nonempty with zero incremental recorded cost; healthy service and reachable webhook | Paid failover mocked; multilingual quality and Hermes key/activation still open |

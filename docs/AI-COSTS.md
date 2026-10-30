@@ -149,3 +149,27 @@ The current policy settings leave paid fallback enabled only within the defined
 routes and caps. `--free-only` is the easy no-paid alternative. Full CI passes on
 the committed changes. Actual free capacity and the dedicated Hermes key remain
 separate from sales activation.
+
+## Activated sales rollout — 2026-10-31 03:22 Dhaka
+
+Sakir explicitly approved recreation of dt-assistant. The selected policy was merged
+with `--sales-only`, and only that container was recreated. Active configuration
+confirmed free-first=true, free_models=[openrouter/free], allow_paid=true and two
+maximum attempts. The deployed code and all six never-auto intents were verified.
+
+`scripts/check-sales-model.py` then called the actual deployed LLM with a synthetic
+prompt, disabling paid fallback in memory for the probe. It returned nonempty
+output and the database recorded zero incremental cost. Service health and public
+webhook remained good; STT and unfinished pricing warnings are pre-existing.
+Hermes remains unchanged. Paid failover was not invoked against live billing.
+
+To repeat from a checkout containing the committed smoke script:
+
+```bash
+# Run from the source checkout; execute against the live service without copying keys.
+sudo docker compose -f /opt/sakir-ai/compose.yml exec -T dt-assistant python - < scripts/check-sales-model.py
+```
+
+This consumes a free request and records usage normally, but sends no customer
+message. The staged-rollout notes above remain history, not the current activation
+state.
