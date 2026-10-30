@@ -51,7 +51,8 @@ complete a business or personal workflow.
   - [x] Verify a live synthetic free request reports zero cost
   - [x] Check sales key: provider-side $10 limit; no top-up performed
   - [x] Prepare merge helper and reusable Hermes policy without replacing live settings
-  - [ ] Build/deploy sales image and verify live routing
+  - [x] Build tested sales image on server after fresh backup (source 06d5b68; running service unchanged)
+  - [ ] Activate new sales image and verify live free-first/fallback routing
   - [ ] Owner approves sales container recreation for the new code
   - [ ] Privately provision a capped Hermes OpenRouter key (none available in audit)
   - [ ] Activate/verify Hermes free-first policy and existing-chat model

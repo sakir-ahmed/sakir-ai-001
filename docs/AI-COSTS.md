@@ -127,3 +127,25 @@ Orbit discovered the OpenRouter chat-completions contract; its integration brief
 request returned 403. Official provider documentation/catalog supplied the verified
 routing, pricing and limit details. Firecrawl developer search returned 402, so
 research continued with official sources.
+
+## Staged rollout record — 2026-10-31 03:19 Dhaka
+
+A fresh encrypted backup completed and the new sales image built successfully on
+the server from source 06d5b68. Existing service remains on its old image until
+owner approval for recreation. Candidate settings/helper are staged under
+`/opt/sakir-ai/.state/cost-policy-06d5b68/`; no credentials were staged there.
+
+After explicit approval, activate only sales (preserve Hermes until its key exists):
+
+```bash
+cd /opt/sakir-ai
+sudo python3 .state/cost-policy-06d5b68/scripts/apply-model-policy.py \
+  --source /opt/sakir-ai/.state/cost-policy-06d5b68 --sales-only
+sudo docker compose up -d --no-deps dt-assistant
+sakir-ai health
+```
+
+The current policy settings leave paid fallback enabled only within the defined
+routes and caps. `--free-only` is the easy no-paid alternative. Full CI passes on
+the committed changes. Actual free capacity and the dedicated Hermes key remain
+separate from sales activation.
