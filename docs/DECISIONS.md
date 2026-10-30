@@ -5,6 +5,20 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-018 · Free-first model routing with explicit paid exceptions
+**Date:** 2026-10-31
+**Context:** Sakir requested minimizing AI/API cost and automatic switching when
+free capacity fails, rather than paying for every routine turn.
+**Decision:** Sales uses the OpenRouter free router for routine inference, a bounded
+low-cost fallback for eligible failures, and DeepSeek for the existing complex
+reply_premium purpose. Price ceilings, input/output limits, cooldown and paid-only
+budget checks constrain spend; allow_paid false enables free-only operation.
+Provider data collection stays denied. Every existing customer approval rule stays.
+**Consequence:** Free capacity/quality is not guaranteed; quota is shared and cannot
+be bypassed by rotating keys. Holding drafts remain the failure path. Hermes has a
+separate reusable policy, but live activation waits for its own capped key and
+version-specific verification. See AI-COSTS.md for prices, evidence and limits.
+
 ## D-017 · Public AI hostname ai001.sakir.bd behind Cloudflare
 **Date:** 2026-10-31
 **Context:** The previous public hostname did not reach the AI webhook. Sakir added

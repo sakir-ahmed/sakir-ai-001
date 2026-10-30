@@ -41,6 +41,22 @@ complete a business or personal workflow.
   - [ ] Verify owner receives a test notification
   - [ ] Verify outside monitor observes success and failure; configured URL alone is insufficient
 
+## P0 — AI cost control before business tests
+
+- [ ] C0 Free-first inference and bounded paid fallback
+  - [x] Verify official free-router, quota and price-ceiling contracts
+  - [x] Implement free-first sales routing, complex-purpose model and free-only toggle
+  - [x] Bound attempts/input/output; price-sort providers; deny data collection
+  - [x] Test quota fallback, cooldown, budget and unchanged approval flows locally
+  - [x] Verify a live synthetic free request reports zero cost
+  - [x] Check sales key: provider-side $10 limit; no top-up performed
+  - [x] Prepare merge helper and reusable Hermes policy without replacing live settings
+  - [ ] Build/deploy sales image and verify live routing
+  - [ ] Owner approves sales container recreation for the new code
+  - [ ] Privately provision a capped Hermes OpenRouter key (none available in audit)
+  - [ ] Activate/verify Hermes free-first policy and existing-chat model
+  - [ ] Evaluate multilingual quality before increasing autonomy
+
 ## P1 — Customer channel and core knowledge
 
 - [ ] S1 Public customer webhook

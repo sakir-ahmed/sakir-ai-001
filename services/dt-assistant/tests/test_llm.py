@@ -138,3 +138,13 @@ async def test_bounded_attempts():
         with pytest.raises(LLMError): await llm.chat('reply',[])
         assert len(seen)==2
     finally: await llm.close()
+
+
+@pytest.mark.asyncio
+async def test_oversized_prompt_never_calls_provider():
+    def handler(_): raise AssertionError('No request expected')
+    llm,_=await make(handler,max_input_bytes=10)
+    try:
+        with pytest.raises(LLMError,match='input size'):
+            await llm.chat('reply',[{'role':'user','content':'a'*100}])
+    finally: await llm.close()
