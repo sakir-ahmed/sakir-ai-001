@@ -110,6 +110,9 @@ complete a business or personal workflow.
   - [ ] Deploy dashboard/settings only after recovery is proven
 - [ ] D2 Prove useful scheduled work
   - [x] Audit n8n runtime: zero workflows
+  - [x] Telegram text round trip verified with @SakirAI_bot — 2026-10-31 03:26 Dhaka
+  - [x] Telegram read-only DevOps toolchain verified — safe-exec audit confirms containers_status, error_summary, disk_usage, reboot_required, ssl_expiry at 03:27 Dhaka
+  - [ ] Prevent host/container confusion by default: earlier bot replies incorrectly claimed host Nginx absent and presented container IP as server IP
   - [ ] Verify Hermes schedules through supported runtime interface
   - [ ] Seven days of morning/evening briefs with useful factual data
   - [ ] Approved content pack and one verified Facebook/Instagram delivery
@@ -157,3 +160,5 @@ or external publishing merely by checking a documentation task.
 | 2026-10-31 02:57 | S1 runtime refresh | Owner-approved recreation of dt-assistant/n8n only; active hostname checks all true; both health endpoints pass; independent public HTTP 403 + JSON assertions pass | Existing STT unhealthy and pricing TODOs remain; Meta customer round trip still open |
 
 | 2026-10-31 03:22 | C0 sales activation | Active free-first code/config verified; deployed free-only synthetic call nonempty with zero incremental recorded cost; healthy service and reachable webhook | Paid failover mocked; multilingual quality and Hermes key/activation still open |
+
+| 2026-10-31 03:26–03:27 | D2 Telegram test | Text reply received; read-only diagnostic response received; five matching safe-exec read-tier audit entries; no changes requested/performed | Default host/container reasoning still needs improvement; voice and schedules not tested |

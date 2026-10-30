@@ -22,7 +22,7 @@ Sakir actually wants done.
 | Customers receive safe, useful help | Real authorized Meta test message → correct knowledge → draft → owner approval → delivered reply; never-auto intents remain gated | New ai001.sakir.bd origin and public Cloudflare HTTPS return expected 403; Meta callback switch and customer round trip remain unverified | S1/S2; C10–C12 |
 | Approved marketing becomes published content | Product facts → complete reviewed content pack → approved calendar → verified post/media receipt → measured result | Draft instructions and publisher foundation; no posts in audited calendar | D2; C04–C09 |
 | Projects move from issue to reviewed delivery | Scoped issue → isolated project work → tests → reviewed PR → separately approved staging/production deployment | Coding tool installation is not this workflow | C01–C03 |
-| Personal assistance saves daily time | Source-backed morning/evening briefs, factual career/learning output and approved calendar actions | Skills exist; seven-day useful-delivery evidence missing | D2; C16 |
+| Personal assistance saves daily time | Source-backed morning/evening briefs, factual career/learning output and approved calendar actions | Telegram text and explicit read-only server diagnostic tests passed; schedules and seven-day useful-delivery evidence missing | D2; C16 |
 | Operations detect and recover from failure | Actionable alert → bounded diagnosis/remediation → owner approval where required → verified service recovery; restore drill | Local backup now finishes; STT and alert/restore gaps remain | R1/R3/V1; C03/C17 |
 | Business decisions use reliable numbers | Reconciled sales/content/spend report with freshness, source and attribution limits | Local metrics foundation; cross-platform/revenue reconciliation missing | C14 |
 | Voice and memory work accurately | Bangla/English voice test → response; reviewed fact correction changes retrieval without changing policy | STT model failed; knowledge placeholders remain; live calls planned | V1/S2; C15/C18 |
@@ -79,3 +79,18 @@ hostname checks passed. Public webhook assertions passed independently with curl
 Postman displayed two passing assertions but returned exit 1 on this rerun; that
 CLI status is not treated as a clean run. This does not change the remaining Meta
 subscription and customer-message acceptance gates.
+
+## Telegram acceptance sample — 2026-10-31 03:26–03:27 Dhaka
+
+The owner authorized a Telegram check. A text-only prompt to @SakirAI_bot received
+the requested reply. A second prompt explicitly selected devops-watch and prohibited
+changes. The bot returned a diagnostic report; safe-exec audit independently
+confirmed five read-tier actions: containers_status, error_summary, disk_usage,
+reboot_required and ssl_expiry. No mutating action appeared in that test audit.
+
+Earlier visible answers incorrectly inferred host Nginx absence and server IP from
+container state. Thus explicit tool-assisted diagnostics passed, but automatic
+selection of the correct host tools on ordinary questions is still an open gap.
+This test did not verify voice, schedules, coding, customer approvals or model cost.
+The already-visible Telegram backup-failure notification also confirms one earlier
+failure alert was delivered; it is historical, not a newly induced failure test.
