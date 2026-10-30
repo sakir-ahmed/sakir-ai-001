@@ -8,28 +8,32 @@ company: "Datatech BD Ltd."
 product: restora                    # default product for new leads
 qdrant_collection: restora          # knowledge collection used for answers
 
-# ---- Models (OpenRouter model IDs) and prices in USD per 1M tokens ----
-# Prices are used only when OpenRouter does not report the exact cost.
+# ---- Free-first routing; paid models only for complex work or fallback ----
+# Free router selects currently available compatible free models automatically.
+# Set allow_paid: false for free-only mode (outages produce a holding draft).
+routing:
+  free_first: true
+  free_models: [openrouter/free]
+  allow_paid: true
+  paid_purposes: [reply_premium]     # existing complaint/proposal drafting path
+  max_attempts: 2                   # no unbounded retry loops
+  max_output_tokens: 500
+  max_input_bytes: 24000
+  data_collection: deny            # do not trade data policy for free capacity
+
+# Price ceilings USD per 1M tokens; verified against OpenRouter 2026-10-31.
 models:
-  classify:
-    id: google/gemini-2.5-flash-lite
-    price_in: 0.10
-    price_out: 0.40
-  reply:
-    id: deepseek/deepseek-v3.2
-    price_in: 0.27
-    price_out: 0.40
-  reply_premium:                    # leads at proposal stage, complaints
-    id: google/gemini-2.5-flash
-    price_in: 0.30
-    price_out: 2.50
+  classify: {id: openrouter/free, price_in: 0, price_out: 0}
+  reply: {id: openrouter/free, price_in: 0, price_out: 0}
+  paid_fallback: {id: google/gemini-2.5-flash-lite, price_in: 0.10, price_out: 0.40}
+  reply_premium: {id: deepseek/deepseek-v3.2, price_in: 0.26, price_out: 0.38}
 
 # ---- Budget guard ----
 budget:
   monthly_usd: 26                   # matches the OpenRouter 'sales' key limit
   alert_at_percent: 70              # Telegram warning to Sakir
-  # When the month's spend reaches the limit, no model is called: every new
-  # message gets a polite holding reply and an approval card for Sakir.
+  # At the limit, paid calls stop. Still-available free inference may continue.
+  # If no eligible model succeeds, use a holding reply/draft for owner review.
 
 # ---- Autonomy ----
 autonomy:
