@@ -50,6 +50,9 @@ origin_code="$(curl -sS --max-time 15 --resolve "${domain}:443:127.0.0.1" \
 public_code="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' "https://${domain}${path}")"
 [[ "$public_code" == 403 ]] || die "Public route failed acceptance: HTTP ${public_code}; settings unchanged"
 env_set "${INSTALL_DIR}/.env" PUBLIC_DOMAIN "$domain"
+if [[ -f "${INSTALL_DIR}/secrets/dt-assistant.env" ]]; then
+  env_set "${INSTALL_DIR}/secrets/dt-assistant.env" PUBLIC_BASE_URL "https://${domain}"
+fi
 ok "Origin TLS and public webhook verified; PUBLIC_DOMAIN=${domain}"
-info "Existing container environment is unchanged; n8n hostname refresh requires a separate reviewed deployment."
+info "Existing container environment is unchanged; sales media URL and n8n hostname refresh require a separate reviewed deployment."
 info "Existing old-domain site was preserved. Prior dedicated-site config (if any): ${rollback}"

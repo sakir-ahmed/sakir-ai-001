@@ -19,7 +19,7 @@ Sakir actually wants done.
 
 | Outcome | Demonstration required | Current evidence / gap | Tracking |
 | --- | --- | --- | --- |
-| Customers receive safe, useful help | Real authorized Meta test message → correct knowledge → draft → owner approval → delivered reply; never-auto intents remain gated | Local HTTP route works; public Cloudflare HTTPS route returns 404; no verified customer round trip | S1/S2; C10–C12 |
+| Customers receive safe, useful help | Real authorized Meta test message → correct knowledge → draft → owner approval → delivered reply; never-auto intents remain gated | New ai001.sakir.bd origin and public Cloudflare HTTPS return expected 403; Meta callback switch and customer round trip remain unverified | S1/S2; C10–C12 |
 | Approved marketing becomes published content | Product facts → complete reviewed content pack → approved calendar → verified post/media receipt → measured result | Draft instructions and publisher foundation; no posts in audited calendar | D2; C04–C09 |
 | Projects move from issue to reviewed delivery | Scoped issue → isolated project work → tests → reviewed PR → separately approved staging/production deployment | Coding tool installation is not this workflow | C01–C03 |
 | Personal assistance saves daily time | Source-backed morning/evening briefs, factual career/learning output and approved calendar actions | Skills exist; seven-day useful-delivery evidence missing | D2; C16 |
@@ -64,3 +64,11 @@ This must pass both assertions. It proves routing and invalid-token rejection,
 not successful subscription, model quality, human approval or customer delivery.
 Those remain separate unchecked acceptance tasks. No real customer event was
 submitted or forwarded to a new hosted capture service during these diagnostics.
+
+## New hostname acceptance — 2026-10-31 02:53 Dhaka
+
+Dedicated ai001.sakir.bd site installed, valid origin certificate issued through
+the existing account, and both origin and public invalid-token rejection verified.
+Certificate expires 2027-01-28 with renewal configured. PUBLIC_DOMAIN updated.
+External Meta callback/subscription and actual customer delivery remain separate
+acceptance gates; this routing success does not complete the sales outcome.

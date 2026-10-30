@@ -138,7 +138,7 @@ sudo bash /opt/sakir-ai/scripts/setup-public-domain.sh ai001.sakir.bd
 
 The command backs up first, renders a dedicated site from the committed template,
 validates/reloads Nginx, issues/reuses a Let's Encrypt certificate, verifies origin
-TLS and public invalid-token rejection, then updates PUBLIC_DOMAIN. It preserves
+TLS and public invalid-token rejection, then updates PUBLIC_DOMAIN and the saved sales PUBLIC_BASE_URL. It preserves
 unrelated sites. Cloudflare must pass HTTP-01 validation to the origin; certificate
 errors must be fixed rather than bypassed. It does not change Cloudflare settings,
 external Meta subscriptions or existing container environments.
