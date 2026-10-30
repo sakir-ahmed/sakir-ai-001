@@ -27,7 +27,7 @@ Scope: read-only live audit plus repository evidence. No percentage is claimed.
 - [ ] R2 Off-site copy and recovery proof
   - [x] Confirm no encrypted archive found during live audit
   - [x] Confirm root default rclone configuration absent
-  - [ ] Sakir selects backup destination/account and configures credentials privately
+  - [ ] Deferred by Sakir (2026-10-31): select backup destination/account and configure credentials privately; local-only recovery risk accepted for now
   - [ ] Verify remote upload and independent retrieval
   - [ ] Restore archive on isolated environment using owner's private key (never put key on server)
   - [ ] Validate both databases, files, permissions and application state
@@ -66,6 +66,15 @@ Scope: read-only live audit plus repository evidence. No percentage is claimed.
   - [ ] Verify embeddings and knowledge retrieval (shared STT dependency)
 
 ## P2 — Deployment and daily workflows
+
+- [ ] D0 Reproducible core source and deployment
+  - [x] Commit backup fix, core source and nested tracker on fix/recovery-and-progress
+  - [x] Add read-only deployment audit that reports paths/status without secrets
+  - [ ] Compare live core files against committed revision
+  - [ ] Capture any live-only reusable scripts after secret review
+  - [ ] Document fresh-server deployment and generated host configuration
+  - [ ] Merge changes to main after validation
+
 
 - [ ] D1 Reconcile server source and deployed bundle
   - [x] Root source checkout observed at 23137fc; current main at audit was 451a8b3
