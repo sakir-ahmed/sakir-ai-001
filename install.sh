@@ -679,17 +679,9 @@ step_hermes() {
   # (Hermes' own env file, confirmed by its docs); config.yaml only needs the
   # model choice below.
   if [[ ! -f "$H/config.yaml" ]]; then
-    cat > "$H/config.yaml" <<'YAML'
-# Written by Sakir AI 001's installer (not the interactive wizard).
-# Change the model any time from Telegram: /model openrouter:<name>
-_config_version: 10
-model: "openrouter:deepseek/deepseek-v3.2"
-fallback_model:
-  provider: openrouter
-  model: google/gemini-2.5-flash
-YAML
+    cp "${INSTALL_DIR}/config/hermes-model-policy.yaml" "$H/config.yaml"
     chown 10001:10001 "$H/config.yaml" 2>/dev/null || true
-    ok "Wrote data/hermes/config.yaml (model: deepseek-v3.2 via OpenRouter)"
+    ok "Wrote data/hermes/config.yaml (free-first OpenRouter with low-cost fallback)"
   else
     info "Hermes already configured (config.yaml exists)"
   fi

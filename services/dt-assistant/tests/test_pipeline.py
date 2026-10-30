@@ -42,7 +42,7 @@ class Env:
         content = json.dumps(self.classification) if body.get("response_format") else self.draft
         return httpx.Response(200, json={
             "choices": [{"message": {"content": content}}],
-            "usage": {"prompt_tokens": 1000, "completion_tokens": 100, "cost": 0.0004},
+            "usage": {"prompt_tokens": 1000, "completion_tokens": 100, "cost": 0 if body["model"] == "openrouter/free" else 0.0004},
         })
 
     def telegram(self, request: httpx.Request) -> httpx.Response:
@@ -103,7 +103,7 @@ async def test_price_question_becomes_draft_card(env):
     assert "pricing.md still has TODOs" in env.telegram_texts[-1]
     lead = await env.db.p.fetchrow("SELECT * FROM leads")
     assert lead["stage"] == "interested" and lead["language"] == "banglish"
-    assert float(await env.db.month_spend()) == pytest.approx(0.0008)   # classify + draft
+    assert float(await env.db.month_spend()) == 0   # free classify + draft
 
 
 async def test_approve_sends_and_logs(env):
@@ -151,7 +151,7 @@ async def test_complaint_gets_holding_reply_and_escalation(env):
     assert held == env.settings.holding_reply("en")
     approval = await env.db.p.fetchrow("SELECT * FROM approvals")
     assert approval["kind"] == "escalation" and approval["status"] == "waiting"
-    assert "google/gemini-2.5-flash" in env.llm_calls                    # premium model for escalations
+    assert "deepseek/deepseek-v3.2" in env.llm_calls                    # premium model for escalations
 
 
 async def test_paused_uses_no_model(env):
@@ -162,10 +162,12 @@ async def test_paused_uses_no_model(env):
     assert (await env.db.p.fetchrow("SELECT kind FROM approvals"))["kind"] == "escalation"
 
 
-async def test_budget_reached_switches_to_holding(env):
+async def test_paid_budget_reached_still_allows_free_drafts(env):
     await env.db.add_spend("reply", 30.0, 0, 0)
     await env.assistant.handle_event(dm("m1", "dam koto?"))
-    assert env.llm_calls == [] and env.send.called
+    assert env.llm_calls == ["openrouter/free", "openrouter/free"]
+    assert not env.send.called
+    assert (await env.db.p.fetchrow("SELECT status FROM approvals"))["status"] == "waiting"
 
 
 async def test_template_auto_send_when_allowed(env):

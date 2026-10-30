@@ -15,6 +15,10 @@ The installer is idempotent: re-run it any time, or run one step with
 | Document | What it covers |
 | --- | --- |
 | [Build Blueprint](Sakir%20AI%20001%20%E2%80%94%20Build%20Blueprint.md) | The original master plan: goals, agents, budget, risks, success measures |
+| [docs/AI-COSTS.md](docs/AI-COSTS.md) | Free-first models, automatic fallback, price caps and free-only switch |
+| [docs/OUTCOMES.md](docs/OUTCOMES.md) | Final-goal acceptance: verified business workflows, not installed tools |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Core source inventory, fresh-server checklist and deployment drift audit |
+| [docs/PROGRESS.md](docs/PROGRESS.md) | Active nested priority checklist, live gaps and verification evidence |
 | [docs/VISION.md](docs/VISION.md) | Complete vision, scope and preserved constraints |
 | [docs/CAPABILITIES.md](docs/CAPABILITIES.md) | Evidence, gaps, workflows and acceptance gates for 18 capability areas |
 | [docs/DELIVERY.md](docs/DELIVERY.md) | Proposed integrations, safety boundaries and phased delivery |
