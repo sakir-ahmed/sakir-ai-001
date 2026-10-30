@@ -50,7 +50,7 @@ complete a business or personal workflow.
   - [x] Save reusable public-route Postman assertions; public acceptance still fails
   - [x] Owner selected ai001.sakir.bd with Cloudflare retained; dedicated deployment script committed
   - [x] Deploy ai001.sakir.bd and valid origin TLS — origin and public Cloudflare route return 403; certificate installed 2026-10-31 02:53 Dhaka
-  - [ ] Refresh sales/n8n container environments for new media/webhook URLs (requires owner confirmation under container-removal rule)
+  - [x] Refresh sales/n8n container environments — explicitly approved by Sakir; active sales media URL, n8n host and webhook URL verified; both health endpoints pass (2026-10-31 02:57 Dhaka)
   - [ ] Verify Meta subscription and signed test event
   - [ ] Test inbound → approval → outbound with authorized test customer
 - [ ] S2 Business knowledge and sales readiness
@@ -136,3 +136,5 @@ or external publishing merely by checking a documentation task.
 | 2026-10-31 02:35 | R1 live backup | `Backup finished`; 167 MB encrypted local archive after targeted deployment of 5321a12 | Off-site destination missing; restore and SQLite consistency remain open |
 
 | 2026-10-31 02:53 | S1 public route | Dedicated ai001.sakir.bd Nginx site; Lets Encrypt certificate expires 2027-01-28; origin and Cloudflare invalid-token probes return 403 | Meta callback subscription and actual message/approval/delivery still unverified |
+
+| 2026-10-31 02:57 | S1 runtime refresh | Owner-approved recreation of dt-assistant/n8n only; active hostname checks all true; both health endpoints pass; independent public HTTP 403 + JSON assertions pass | Existing STT unhealthy and pricing TODOs remain; Meta customer round trip still open |

@@ -72,3 +72,10 @@ the existing account, and both origin and public invalid-token rejection verifie
 Certificate expires 2027-01-28 with renewal configured. PUBLIC_DOMAIN updated.
 External Meta callback/subscription and actual customer delivery remain separate
 acceptance gates; this routing success does not complete the sales outcome.
+
+The saved sales media URL and n8n public URLs were activated through owner-approved
+container recreation on 2026-10-31 02:57 Dhaka. Both health endpoints and active
+hostname checks passed. Public webhook assertions passed independently with curl.
+Postman displayed two passing assertions but returned exit 1 on this rerun; that
+CLI status is not treated as a clean run. This does not change the remaining Meta
+subscription and customer-message acceptance gates.

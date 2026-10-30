@@ -147,3 +147,23 @@ Public root and unknown paths return 404 by design. The webhook uses `/meta/webh
 there is no public generic `/api/v1` or admin dashboard. New public APIs require a
 specific contract and authentication review. Existing HTTPS sites are reused on
 subsequent runs; inspect unexpected pre-existing site files before running.
+
+### Activate saved domain in existing containers
+
+After explicit owner approval for container recreation, and after a current backup:
+
+```bash
+cd /opt/sakir-ai
+sudo docker compose up -d --no-deps dt-assistant n8n
+curl -fsS http://127.0.0.1:8081/health
+curl -fsS http://127.0.0.1:5678/healthz
+sakir-ai health
+```
+
+Completed with Sakir's explicit approval on 2026-10-31 at approximately 02:57 Dhaka.
+Persistent volumes were retained. Verified active `PUBLIC_BASE_URL` for sales and
+`N8N_HOST` / `WEBHOOK_URL` for n8n against the new hostname without printing secrets.
+Sales and n8n health endpoints passed. Overall health still fails on the existing
+STT issue; pricing knowledge still contains TODOs. This command refreshes selected
+container configuration, not source code or images, and does not prove a business
+workflow has completed.
