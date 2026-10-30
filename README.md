@@ -15,6 +15,9 @@ The installer is idempotent: re-run it any time, or run one step with
 | Document | What it covers |
 | --- | --- |
 | [Build Blueprint](Sakir%20AI%20001%20%E2%80%94%20Build%20Blueprint.md) | The original master plan: goals, agents, budget, risks, success measures |
+| [docs/VISION.md](docs/VISION.md) | Complete vision, scope and preserved constraints |
+| [docs/CAPABILITIES.md](docs/CAPABILITIES.md) | Evidence, gaps, workflows and acceptance gates for 18 capability areas |
+| [docs/DELIVERY.md](docs/DELIVERY.md) | Proposed integrations, safety boundaries and phased delivery |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The system as built, with diagrams |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Why things are the way they are (and where they differ from the blueprint) |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | Daily/weekly/monthly routines, incident playbooks, updates, full restore |
