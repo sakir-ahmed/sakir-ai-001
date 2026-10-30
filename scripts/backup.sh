@@ -92,7 +92,7 @@ info "  files: $(du -h "$WORK/files.tgz" | cut -f1)"
 
 # ---- Encrypt into one archive ----
 OUT="${INSTALL_DIR}/backups/sakir-ai_${DAY}.tar.age"
-tar -cf - -C "$WORK" . | age -R "$RECIPIENT" -o "$WORK/archive.tar.age"
+tar -cf - -C "$WORK" ai-db.sql.gz n8n-db.sql.gz extra files.tgz | age -R "$RECIPIENT" -o "$WORK/archive.tar.age"
 # Only a successfully encrypted archive may match the health/retention pattern.
 mv "$WORK/archive.tar.age" "$OUT"
 chmod 600 "$OUT"

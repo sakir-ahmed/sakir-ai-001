@@ -8,7 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 class BackupTests(unittest.TestCase):
-    def run_backup(self, tar_status=0, age_status=0, hook=False):
+    def run_backup(self, tar_status=0, age_status=0, hook=False, outer_check=False):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             for name in ['lib', 'scripts/backup.d', 'backups', 'bin']:
@@ -21,7 +21,7 @@ hc_ping() { :; }; notify_telegram() { echo ALERT; }
             (root / 'recipient').write_text('test public recipient')
             commands = {
                 'docker': '#!/bin/bash\necho fixture-database\n',
-                'tar': '#!/bin/bash\nif [[ "$1" == "-czf" ]]; then echo files > "$2"; exit "${TEST_TAR_STATUS}"; fi\necho outer-archive\n',
+                'tar': '#!/bin/bash\nif [[ "$1" == "-czf" ]]; then echo files > "$2"; exit "${TEST_TAR_STATUS}"; fi\nif [[ "${TEST_OUTER_CHECK}" == 1 && "${!#}" == "." ]]; then echo "archive includes changing output" >&2; exit 1; fi\necho outer-archive\n',
                 'age': '#!/bin/bash\nwhile [[ $# -gt 0 ]]; do if [[ "$1" == "-o" ]]; then shift; out="$1"; fi; shift; done\ncat > "$out"\nexit "${TEST_AGE_STATUS}"\n',
                 'rclone': '#!/bin/bash\nexit 0\n',
                 'flock': '#!/bin/bash\nexit 0\n',
@@ -33,7 +33,7 @@ hc_ping() { :; }; notify_telegram() { echo ALERT; }
             env = dict(os.environ, INSTALL_DIR=str(root),
                        RECIPIENT=str(root / 'recipient'), LOG_FILE=str(root / 'log'),
                        PATH=str(root / 'bin') + ':' + os.environ['PATH'],
-                       TEST_TAR_STATUS=str(tar_status), TEST_AGE_STATUS=str(age_status))
+                       TEST_TAR_STATUS=str(tar_status), TEST_AGE_STATUS=str(age_status), TEST_OUTER_CHECK=str(int(outer_check)))
             script = root / 'backup.sh'
             script.write_text((ROOT / 'scripts/backup.sh').read_text().replace('RECIPIENT=/root/backup-recipient.txt', 'RECIPIENT="$INSTALL_DIR/recipient"'))
             result = subprocess.run(['bash', str(script)], env=env, text=True, capture_output=True)
@@ -62,6 +62,11 @@ hc_ping() { :; }; notify_telegram() { echo ALERT; }
         code, output, count = self.run_backup(hook=True)
         self.assertNotEqual(code, 0)
         self.assertEqual(count, 0)
+
+    def test_outer_archive_excludes_its_output(self):
+        code, output, count = self.run_backup(outer_check=True)
+        self.assertEqual(code, 0, output)
+        self.assertEqual(count, 1)
 
     def test_normal_backup(self):
         code, output, count = self.run_backup()

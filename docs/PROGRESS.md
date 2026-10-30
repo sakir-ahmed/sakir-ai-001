@@ -15,11 +15,12 @@ Scope: read-only live audit plus repository evidence. No percentage is claimed.
   - [x] Reproduce archive warning, partial encryption and ignored hook failures
   - [x] Fix handling: warn on tar status 1, fail on fatal archive errors
   - [x] Publish final archive only after successful encryption
+  - [x] Exclude encrypted output from outer archive; regression added after live run
   - [x] Fail whole backup when a product dump hook fails
   - [x] Serialize concurrent backup runs and restrict temporary file permissions
-  - [x] Add five isolated regression cases and run them successfully
+  - [x] Add six isolated regression cases and run them successfully
   - [ ] Merge reviewed fix into main
-  - [ ] Deploy backup script without changing secrets or other services
+  - [x] Deploy backup script without changing secrets or other services — targeted script replacement; rollback copy retained
   - [ ] Run live backup and verify completed encrypted archive
   - [ ] Next scheduled timer run succeeds
   - [ ] Application-consistent SQLite snapshots for live state (current tar warning is not this guarantee)
@@ -112,4 +113,4 @@ or external publishing merely by checking a documentation task.
 | Date (Dhaka) | Item | Evidence | Remaining gate |
 | --- | --- | --- | --- |
 | 2026-10-31 | Audit | Termius health, database counts and redacted service logs | No new business workflow acceptance established |
-| 2026-10-31 | R1 local tests | `python3 -m unittest discover -s tests -v`: 5 passed | Live deployment, backup, remote copy and restore |
+| 2026-10-31 | R1 local tests | `python3 -m unittest discover -s tests -v`: 6 passed | Live deployment, backup, remote copy and restore |
