@@ -22,6 +22,7 @@ def allowed(path):
 
 
 def audit(source, installed, revision):
+    source, installed = source.resolve(), installed.resolve()
     def git(*args):
         return subprocess.check_output(['git', '-C', str(source), *args])
     commit = git('rev-parse', '--verify', revision + '^{commit}').decode().strip()
@@ -31,7 +32,7 @@ def audit(source, installed, revision):
     print('Reference commit:', commit)
     for name in sorted(tracked):
         path = installed / name
-        if path.is_symlink() or any(parent.is_symlink() for parent in path.parents if parent != installed.parent):
+        if path.is_symlink() or any((installed / parent).is_symlink() for parent in Path(name).parents):
             status = 'SYMLINK'
         elif not path.is_file():
             status = 'MISSING'

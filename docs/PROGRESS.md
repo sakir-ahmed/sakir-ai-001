@@ -70,9 +70,11 @@ Scope: read-only live audit plus repository evidence. No percentage is claimed.
 - [ ] D0 Reproducible core source and deployment
   - [x] Commit backup fix, core source and nested tracker on fix/recovery-and-progress
   - [x] Add read-only deployment audit that reports paths/status without secrets
-  - [ ] Compare live core files against committed revision
-  - [ ] Capture any live-only reusable scripts after secret review
-  - [ ] Document fresh-server deployment and generated host configuration
+  - [x] Compare live core files against committed revision — 68 matches; three older committed versions; four undeployed files; no extra core files
+  - [x] Check for live-only reusable core scripts — none found in audited scope; eight host units/runner/logrotate match committed bundle
+  - [x] Document fresh-server deployment and generated host configuration — DEPLOYMENT.md
+  - [x] Test drift reporting, extra/modified detection and secret/symlink exclusion
+  - [ ] Validate clean installation on a second server (not yet performed)
   - [ ] Merge changes to main after validation
 
 
