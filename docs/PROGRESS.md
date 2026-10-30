@@ -8,6 +8,9 @@ and live acceptance are separate milestones. Owner: Sakir; implementation: Sakir
 Last audit: 2026-10-31, approximately 02:27 Asia/Dhaka, through Termius.
 Scope: read-only live audit plus repository evidence. No percentage is claimed.
 
+Final-goal acceptance: [OUTCOMES.md](OUTCOMES.md). Installed tools alone never
+complete a business or personal workflow.
+
 ## P0 — Recovery and alerts (in progress)
 
 - [ ] R1 Reliable local encrypted backups
@@ -42,8 +45,11 @@ Scope: read-only live audit plus repository evidence. No percentage is claimed.
 
 - [ ] S1 Public customer webhook
   - [x] Audit: HTTPS webhook returns 404
-  - [ ] Compare local route, Nginx routing, DNS and TLS to isolate cause
-  - [ ] Correct routing; wrong verification token returns expected rejection
+  - [x] Compare local route, Nginx routing, DNS and TLS — app and Host-routed HTTP return 403; public Cloudflare route returns 404; origin HTTPS certificate mismatches
+  - [ ] Inspect actual Cloudflare proxy/tunnel target (owner chose to retain Cloudflare)
+  - [x] Save reusable public-route Postman assertions; public acceptance still fails
+  - [x] Owner selected ai001.sakir.bd with Cloudflare retained; dedicated deployment script committed
+  - [ ] Deploy new hostname and valid origin TLS; wrong verification token returns expected rejection
   - [ ] Verify Meta subscription and signed test event
   - [ ] Test inbound → approval → outbound with authorized test customer
 - [ ] S2 Business knowledge and sales readiness

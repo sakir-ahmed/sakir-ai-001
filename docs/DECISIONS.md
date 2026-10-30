@@ -5,6 +5,18 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-017 · Public AI hostname ai001.sakir.bd behind Cloudflare
+**Date:** 2026-10-31
+**Context:** The previous public hostname did not reach the AI webhook. Sakir added
+an A record for ai001.sakir.bd and explicitly chose to retain Cloudflare.
+**Decision:** Use ai001.sakir.bd as PUBLIC_DOMAIN with a dedicated Nginx site and
+valid origin certificate. Reuse existing public paths (/meta/webhook, /hooks/,
+/public-media/). Do not expose internal APIs, admin pages or a generic /api/v1 proxy.
+Keep unrelated sites intact. Record provisioning in scripts/setup-public-domain.sh.
+**Consequence:** Meta callback becomes https://ai001.sakir.bd/meta/webhook after
+verification. Existing external subscriptions must be updated separately. n8n's
+container environment needs a separate refresh to adopt the new public URL.
+
 ## D-016 · Backup completion requires successful encryption and every product dump
 **Date:** 2026-10-31
 **Context:** The live nightly backup failed on GNU tar's status 1 when Grafana

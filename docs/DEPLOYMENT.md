@@ -126,3 +126,24 @@ Compared `/opt/sakir-ai` against revision `173492c` through Termius:
 
 No missing live-only core script was discovered in this scope. Full OS/provisioner
 state and a clean deployment on another server have not been verified.
+
+## Dedicated Cloudflare-proxied hostname
+
+Owner-selected hostname: `ai001.sakir.bd` (2026-10-31). Its A record stays proxied.
+With a pre-existing certbot ACME account and the installed bundle:
+
+```bash
+sudo bash /opt/sakir-ai/scripts/setup-public-domain.sh ai001.sakir.bd
+```
+
+The command backs up first, renders a dedicated site from the committed template,
+validates/reloads Nginx, issues/reuses a Let's Encrypt certificate, verifies origin
+TLS and public invalid-token rejection, then updates PUBLIC_DOMAIN. It preserves
+unrelated sites. Cloudflare must pass HTTP-01 validation to the origin; certificate
+errors must be fixed rather than bypassed. It does not change Cloudflare settings,
+external Meta subscriptions or existing container environments.
+
+Public root and unknown paths return 404 by design. The webhook uses `/meta/webhook`;
+there is no public generic `/api/v1` or admin dashboard. New public APIs require a
+specific contract and authentication review. Existing HTTPS sites are reused on
+subsequent runs; inspect unexpected pre-existing site files before running.
