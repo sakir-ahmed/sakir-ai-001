@@ -29,6 +29,11 @@ KEEP_DAYS="${KEEP_DAYS:-14}"
 RECIPIENT=/root/backup-recipient.txt
 
 require_root
+umask 077
+
+# Serialize timer/manual runs so archives and retention cannot race.
+exec 9>"${INSTALL_DIR}/backups/.backup.lock"
+flock -n 9 || die "Another backup is already running"
 
 # Any failure from here on: tell Sakir, mark the run failed, exit non-zero.
 on_failure() {
@@ -43,7 +48,7 @@ hc_ping HC_BACKUP_URL /start
 [[ -s "$RECIPIENT" ]] || { on_failure "$LINENO (no public key at $RECIPIENT; run install.sh --step timers)"; exit 1; }
 
 cd "$INSTALL_DIR"
-DAY="$(date +%F_%H%M)"
+DAY="$(date +%F_%H%M%S)"
 WORK="$(mktemp -d "${INSTALL_DIR}/backups/.work.XXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -67,19 +72,29 @@ mkdir -p "$WORK/extra"
 shopt -s nullglob
 for hook in "${INSTALL_DIR}"/scripts/backup.d/*.sh; do
   info "  hook: ${hook##*/}"
-  bash "$hook" "$WORK/extra" || warn "  hook failed: ${hook##*/}"
+  bash "$hook" "$WORK/extra"
 done
 
 # ---- Files (code, settings, secrets, agent memory, knowledge) ----
+archive_status=0
 tar -czf "$WORK/files.tgz" \
   --exclude='data/hermes/cache' --exclude='data/hermes/logs' \
   compose.yml .env versions.env config secrets knowledge \
-  data/hermes data/kuma data/grafana
+  data/hermes data/kuma data/grafana || archive_status=$?
+# GNU tar returns 1 for files changing while read; 2 means a fatal error.
+# This remains a live-file archive, not an application-consistent SQLite snapshot.
+case "$archive_status" in
+  0) ;;
+  1) warn "Live files changed during backup; verify application state in a restore drill" ;;
+  *) on_failure "file archive (tar exit $archive_status)"; exit "$archive_status" ;;
+esac
 info "  files: $(du -h "$WORK/files.tgz" | cut -f1)"
 
 # ---- Encrypt into one archive ----
 OUT="${INSTALL_DIR}/backups/sakir-ai_${DAY}.tar.age"
-tar -cf - -C "$WORK" . | age -R "$RECIPIENT" -o "$OUT"
+tar -cf - -C "$WORK" ai-db.sql.gz n8n-db.sql.gz extra files.tgz | age -R "$RECIPIENT" -o "$WORK/archive.tar.age"
+# Only a successfully encrypted archive may match the health/retention pattern.
+mv "$WORK/archive.tar.age" "$OUT"
 chmod 600 "$OUT"
 ok "Encrypted archive: ${OUT} ($(du -h "$OUT" | cut -f1))"
 

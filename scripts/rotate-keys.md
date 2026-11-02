@@ -7,8 +7,8 @@ the file shown) and then `sakir-ai restart`.
 | Secret | Where to rotate | Where it is stored |
 | --- | --- | --- |
 | OpenRouter keys (hermes-core, sales, content, spare) | openrouter.ai → Keys → delete and recreate with the same limits | `data/hermes/.env`, `secrets/dt-assistant.env` |
-| @SakirAI_bot token | @BotFather → `/revoke` | `data/hermes/.env`, `secrets/safe-exec.env` |
-| @DTSalesDesk_bot token | @BotFather → `/revoke` | `secrets/dt-assistant.env` |
+| @sakir_ai_001_bot token | @BotFather → `/revoke` | `data/hermes/.env`, `secrets/safe-exec.env` |
+| @sakir_ai_001_sales_bot token | @BotFather → `/revoke` | `secrets/dt-assistant.env` |
 | Meta Page token | Graph API Explorer → new long-lived Page token | `secrets/dt-assistant.env` |
 | Meta App Secret | App settings → Basic → Reset | `secrets/dt-assistant.env` |
 | Meta verify token | generate: `openssl rand -hex 24`, update in App → Webhooks | `secrets/dt-assistant.env` |

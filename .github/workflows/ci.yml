@@ -47,6 +47,9 @@ jobs:
           print("yaml and skills ok")
           EOF
 
+      - name: Backup failure regression tests
+        run: python3 -m unittest discover -s tests -v
+
       - name: Customer-safety rule is intact
         run: |
           python3 - <<'EOF'

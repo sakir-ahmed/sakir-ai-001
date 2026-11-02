@@ -66,7 +66,7 @@ Datatech BD Ltd., [address], Bangladesh · [privacy email] · [phone]
 ---
 
 ## For Sakir: handling a deletion request
-1. Find the lead: in @DTSalesDesk_bot `/lead <name>`.
+1. Find the lead: in @sakir_ai_001_sales_bot `/lead <name>`.
 2. Delete (asks for confirmation on the server; take a backup first):
    ```bash
    sakir-ai backup

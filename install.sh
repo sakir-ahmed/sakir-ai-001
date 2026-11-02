@@ -425,8 +425,8 @@ step_secrets() {
   # ---- External secrets (you create these; see README "Before you install") ----
   local owner hermes_bot sales_bot or_hermes or_sales meta_secret meta_page meta_token ig_user
   ask owner "Your numeric Telegram user ID (from @userinfobot)" "$(env_get "$S/dt-assistant.env" TELEGRAM_OWNER_ID)"
-  ask_secret hermes_bot "Token of @SakirAI_bot (Hermes, from @BotFather)"
-  ask_secret sales_bot  "Token of @DTSalesDesk_bot (approvals, from @BotFather)"
+  ask_secret hermes_bot "Token of @sakir_ai_001_bot (Hermes, from @BotFather)"
+  ask_secret sales_bot  "Token of @sakir_ai_001_sales_bot (approvals, from @BotFather)"
   ask_secret or_hermes  "OpenRouter API key for HERMES (your assistant's own brain)"
   ask_secret or_sales   "OpenRouter API key for SALES (limit about \$26/month)"
   ask_secret meta_secret "Meta App Secret (developers.facebook.com > App settings > Basic)"
@@ -533,9 +533,9 @@ step_secrets() {
   # Report what is still missing (without printing values).
   local missing=()
   [[ -n "$(env_get "$D" TELEGRAM_OWNER_ID)" ]] || missing+=("Telegram user ID")
-  [[ -n "$(env_get "$S/safe-exec.env" TELEGRAM_BOT_TOKEN)" ]] || missing+=("@SakirAI_bot token")
+  [[ -n "$(env_get "$S/safe-exec.env" TELEGRAM_BOT_TOKEN)" ]] || missing+=("@sakir_ai_001_bot token")
   [[ -n "$(env_get "$HE" OPENROUTER_API_KEY)" ]] || missing+=("OpenRouter key for Hermes")
-  [[ -n "$(env_get "$D" SALES_BOT_TOKEN)" ]] || missing+=("@DTSalesDesk_bot token")
+  [[ -n "$(env_get "$D" SALES_BOT_TOKEN)" ]] || missing+=("@sakir_ai_001_sales_bot token")
   [[ -n "$(env_get "$D" OPENROUTER_API_KEY)" ]] || missing+=("OpenRouter sales key")
   [[ -n "$(env_get "$D" META_PAGE_TOKEN)" ]] || missing+=("Meta Page token (sales stays off)")
   if ((${#missing[@]})); then
@@ -673,23 +673,15 @@ step_hermes() {
   # We write config.yaml ourselves instead of running `hermes setup`: that
   # interactive wizard logs into the Nous Portal and offers to create a brand
   # new Telegram bot, which is not what we want (we already have
-  # @SakirAI_bot's token in data/hermes/.env) and it has crashed under
+  # @sakir_ai_001_bot's token in data/hermes/.env) and it has crashed under
   # `docker compose run ... </dev/tty` on at least one real install. Telegram
   # and the OpenRouter key are picked up from data/hermes/.env at startup
   # (Hermes' own env file, confirmed by its docs); config.yaml only needs the
   # model choice below.
   if [[ ! -f "$H/config.yaml" ]]; then
-    cat > "$H/config.yaml" <<'YAML'
-# Written by Sakir AI 001's installer (not the interactive wizard).
-# Change the model any time from Telegram: /model openrouter:<name>
-_config_version: 10
-model: "openrouter:deepseek/deepseek-v3.2"
-fallback_model:
-  provider: openrouter
-  model: google/gemini-2.5-flash
-YAML
+    cp "${INSTALL_DIR}/config/hermes-model-policy.yaml" "$H/config.yaml"
     chown 10001:10001 "$H/config.yaml" 2>/dev/null || true
-    ok "Wrote data/hermes/config.yaml (model: deepseek-v3.2 via OpenRouter)"
+    ok "Wrote data/hermes/config.yaml (free-first OpenRouter with low-cost fallback)"
   else
     info "Hermes already configured (config.yaml exists)"
   fi
@@ -699,7 +691,7 @@ YAML
   fi
 
   docker compose up -d hermes
-  ok "Hermes started. Message @SakirAI_bot on Telegram to test."
+  ok "Hermes started. Message @sakir_ai_001_bot on Telegram to test."
   mark_done hermes
 }
 

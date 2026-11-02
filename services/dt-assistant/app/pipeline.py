@@ -6,7 +6,7 @@ Inbound flow (one Facebook/Instagram event):
   2. voice message -> transcribe with the stt service
   3. classify intent + language (cheap model) unless paused / over budget
   4. policy.decide() -> hide | holding | escalate | template | draft
-  5. send automatically, or post a draft card to @DTSalesDesk_bot
+  5. send automatically, or post a draft card to @sakir_ai_001_sales_bot
   6. every outbound message is logged; Messenger replies respect the 24h window
 
 Scheduled jobs (started from main.py):

@@ -318,7 +318,7 @@ def render_dashboard(message: str = "") -> str:
             for a in approvals[:10]
         ) + "</ul>"
         if len(approvals) > 10:
-            approvals_html += f'<p class="hint">+{len(approvals) - 10} more — see @DTSalesDesk_bot</p>'
+            approvals_html += f'<p class="hint">+{len(approvals) - 10} more — see @sakir_ai_001_sales_bot</p>'
 
     diagram = """
 <div class="mermaid">
@@ -424,8 +424,8 @@ def render_settings(message: str = "") -> str:
 
 <fieldset><legend>Telegram</legend>
 {text_input("owner", "Your Telegram user ID", owner)}
-{secret_input("hermes_bot", "Token of @SakirAI_bot (Hermes)", hermes_bot_set)}
-{secret_input("sales_bot", "Token of @DTSalesDesk_bot (approvals)", sales_bot_set)}
+{secret_input("hermes_bot", "Token of @sakir_ai_001_bot (Hermes)", hermes_bot_set)}
+{secret_input("sales_bot", "Token of @sakir_ai_001_sales_bot (approvals)", sales_bot_set)}
 </fieldset>
 
 <fieldset><legend>OpenRouter</legend>

@@ -6,12 +6,12 @@ updates and restores. Commands assume you are logged in as `sakir` on the server
 ## Routines
 
 ### Daily (5 minutes)
-- Read the 08:30 morning brief and the 21:30 evening summary on @SakirAI_bot.
-- Clear @DTSalesDesk_bot: approve, edit or reject every draft (they expire after 24 hours).
+- Read the 08:30 morning brief and the 21:30 evening summary on @sakir_ai_001_bot.
+- Clear @sakir_ai_001_sales_bot: approve, edit or reject every draft (they expire after 24 hours).
 - Act on any alert (site down, angry customer, spend warning, approval code).
 
 ### Weekly (Friday, 30 minutes)
-- [ ] Review 20 customer replies: `/stats` in @DTSalesDesk_bot, then scroll the sent cards.
+- [ ] Review 20 customer replies: `/stats` in @sakir_ai_001_sales_bot, then scroll the sent cards.
       Note the edit rate (target: under 20%).
 - [ ] Fix what the edits show: add facts to `knowledge/`, add FAQ templates, tune `sales/prompt.md`.
 - [ ] `sakir-ai reindex` if knowledge changed.
@@ -94,7 +94,7 @@ and stay with you. After each change: `sakir-ai restart dt-assistant`.
 6. While fixing: `sakir-ai pause` sends holding replies so nobody is ignored.
 
 ### A wrong reply went to a customer
-1. `sakir-ai pause` (or `/pause` in @DTSalesDesk_bot).
+1. `sakir-ai pause` (or `/pause` in @sakir_ai_001_sales_bot).
 2. Reply to the customer personally from Meta Business Suite.
 3. Find the cause: missing fact (add to knowledge), bad template, or the intent was automatic
    (remove it from `auto_intents`).
@@ -165,6 +165,15 @@ cd ~/sakir-ai-001 && git pull
 sudo bash install.sh --step layout     # copies new code to /opt/sakir-ai (never touches data or secrets)
 sudo bash install.sh --step stack      # rebuilds and restarts
 ```
+
+## Backup completion and progress
+
+Track active recovery work in [PROGRESS.md](PROGRESS.md). Concurrent backups are
+rejected. Fatal archive errors, failed product dump hooks and encryption failures
+fail the run; incomplete encrypted output never becomes a final backup filename.
+GNU tar status 1 logs a warning because live files changed. Such a backup still
+needs a restore drill and is not an application-consistent SQLite snapshot.
+Local success without an off-site copy is not disaster-recovery completion.
 
 ## Restore
 
