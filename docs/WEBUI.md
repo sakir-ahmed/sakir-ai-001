@@ -34,7 +34,7 @@ Existing sales routing and Hermes remain independent and unchanged.
 
 ## Remaining work
 
-- [ ] Deploy and verify UI health and local model discovery.
+- [x] Deploy and verify UI health and local model discovery.
 - [x] Owner creates administrator; disable subsequent signups.
 - [x] HTTPS login page published through NGINX; authenticated chat acceptance remains pending.
 - [ ] Bengali text quality and CPU latency acceptance.
@@ -59,4 +59,8 @@ References: [official installation guide](https://docs.openwebui.com/getting-sta
 - NGINX root now proxies to Open WebUI with WebSocket support. Public root and
   all linked application assets returned HTTP 200 with appropriate content types;
   invalid-token Meta webhook still returned 403. User reported seeing the login form.
-- Authenticated model response and voice quality remain unverified.
+- Independently observed signed-in browser with qwen2.5:1.5b selected; the
+  owner greeting received a completed response. UI timing reported total 23.68 s,
+  model load 4.22 s, prompt evaluation 15.17 s (2,050 tokens), generation 1.22 s
+  (17 tokens, 13.99 tokens/s). This was a completed CPU request, not a stalled proxy.
+- Voice quality, other-provider credentials and automatic escalation remain unverified.

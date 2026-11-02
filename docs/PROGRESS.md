@@ -181,7 +181,9 @@ or external publishing merely by checking a documentation task.
 - [x] Confirm existing ai001.sakir.bd NGINX hostname/certificate paths and syntax.
 - [x] Owner completes private administrator prompt in Termius.
 - [x] Verify signup disabled; publish existing domain; verify HTTPS page/assets and protected model API.
-- [ ] Complete authenticated browser login and chat acceptance.
-- [ ] Verify Ollama discovery and authenticated chat from UI.
+- [x] Complete authenticated browser login and chat acceptance.
+- [x] Independently verify Ollama discovery and completed authenticated chat from UI.
+  - [x] Record first response: 23.68 s total; 4.22 s load, 15.17 s prompt processing.
+  - [ ] Measure warm-response latency and review optional background inference tasks.
 - [ ] Owner optionally configures other providers privately; default remains local.
 - [ ] Bengali voice and visible Hermes task execution acceptance (not supplied by UI installation).
