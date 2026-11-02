@@ -86,3 +86,43 @@ Default built-in tools can add prompt overhead; removing their instructions
 from a chat-only model and extending keep-alive are candidates, not applied
 changes. The owner reclaimed desktop control before further tuning; no model
 variant, context reduction, service restart or additional provider was activated.
+
+## Next performance experiment — prepared 2026-11-03, not run live
+
+`scripts/benchmark-local-ai.py` measures initial and warm local `/api/chat`
+requests, prompt tokens, loading, prompt evaluation and output throughput. It
+uses only synthetic English/Bangla text, limits output to 24 tokens, retains the
+existing 4,096 context, and refuses models not already installed. It does not
+change the default model, download anything or call cloud providers. Requests
+temporarily retain each tested model for 30 minutes; this is not a persistent
+keep-alive configuration change. Run when no user chat is generating:
+
+```bash
+python3 scripts/benchmark-local-ai.py --model qwen2.5:1.5b
+# Optional extra context probe; increases CPU work but uses no private content.
+python3 scripts/benchmark-local-ai.py --model qwen2.5:1.5b --with-context-case
+```
+
+Compare direct prompt token counts against the observed 2,050 WebUI tokens.
+The pinned Open WebUI source enables built-in tools by default for eligible
+session requests and provides a `builtin_tools` model capability to disable
+them. This is a concrete candidate explanation, not proof that all 2,050 tokens
+are tool definitions. A chat-only variant would lose those tool abilities; keep
+the working model available and measure before selecting it as the default.
+Longer keep-alive can reduce loading after idle periods, but cannot eliminate
+prompt processing. Do not shrink context or select a smaller model without
+checking Bengali quality and stating the resulting tradeoff. Inspect GPU
+availability before proposing hardware acceleration; CPU-only current inference
+does not itself establish that the host lacks a GPU.
+
+Live execution is blocked: the saved `contabo-sakir` SSH alias fails host-key
+verification, and the owner has reclaimed the desktop. No SSH configuration or
+known-host entry was changed. Verify the host fingerprint through an existing
+trusted Termius session/provider console before changing trust. Do not use
+`StrictHostKeyChecking=no` or remove the old key to suppress the failure.
+A brief future Termius window is needed to establish trusted background access
+and run the prepared tests; no new performance result is claimed.
+
+Sources: [Ollama chat metrics and keep-alive](https://docs.ollama.com/api/chat),
+[Ollama resource/configuration FAQ](https://docs.ollama.com/faq),
+[Open WebUI v0.12.5 tool gating](https://github.com/open-webui/open-webui/blob/v0.12.5/backend/open_webui/utils/middleware.py#L2107).

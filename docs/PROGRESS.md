@@ -198,3 +198,13 @@ or external publishing merely by checking a documentation task.
 - [ ] Review built-in tool context and keep-alive tradeoffs, then measure again.
 - [ ] Apply further tuning only when desktop control is authorized again or an
   existing authorized background server connection is available.
+
+### Background-only follow-up — 2026-11-03
+
+- [x] Preserve desktop control with owner; no further computer-use actions.
+- [x] Attempt saved background SSH connection; detect host-key mismatch without bypassing verification.
+- [x] Prepare bounded, local-only initial/warm benchmark and verify metric reporting offline.
+- [ ] Verify server identity through trusted access before updating SSH trust.
+- [ ] Run direct-vs-WebUI prompt and warm-response comparisons on server.
+- [ ] Inspect available GPU and CPU limits; evaluate model alternatives with Bengali quality checks.
+- [ ] Apply a measured improvement; current primary-chat speed remains about 24 seconds.
