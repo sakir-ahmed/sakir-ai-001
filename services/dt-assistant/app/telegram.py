@@ -1,5 +1,5 @@
 """
-@DTSalesDesk_bot — the approval desk for customer replies.
+@sakir_ai_001_sales_bot — the approval desk for customer replies.
 
 Only Sakir's Telegram user ID is served; messages from anyone else are
 ignored. Uses long polling (no public webhook needed).

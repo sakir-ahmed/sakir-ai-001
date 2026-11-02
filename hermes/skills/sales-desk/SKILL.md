@@ -4,7 +4,7 @@ description: Answer Sakir's questions about leads, customer messages, drafts wai
 ---
 # Sales desk (read side)
 
-Customer replies are handled by dt-assistant and approved in @DTSalesDesk_bot.
+Customer replies are handled by dt-assistant and approved in @sakir_ai_001_sales_bot.
 You read its data and can pause it; you never message customers yourself.
 
 | Sakir asks | Run |
@@ -18,7 +18,7 @@ You read its data and can pause it; you never message customers yourself.
 
 ## Answer style
 - Lead summary: name · business · phone · stage · last message time.
-- Remind Sakir that approvals happen in @DTSalesDesk_bot (buttons on each draft).
+- Remind Sakir that approvals happen in @sakir_ai_001_sales_bot (buttons on each draft).
 - If a lead is outside Meta's 24-hour window and has a phone number, suggest a call
   or WhatsApp.
 

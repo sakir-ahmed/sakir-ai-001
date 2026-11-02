@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX IF NOT EXISTS messages_lead_idx ON messages (lead_id, created_at);
 CREATE INDEX IF NOT EXISTS messages_created_idx ON messages (created_at);
 
--- Drafts waiting for Sakir in @DTSalesDesk_bot.
+-- Drafts waiting for Sakir in @sakir_ai_001_sales_bot.
 CREATE TABLE IF NOT EXISTS approvals (
     id                  SERIAL PRIMARY KEY,
     lead_id             INT REFERENCES leads(id) ON DELETE CASCADE,

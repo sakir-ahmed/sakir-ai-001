@@ -162,3 +162,12 @@ or external publishing merely by checking a documentation task.
 | 2026-10-31 03:22 | C0 sales activation | Active free-first code/config verified; deployed free-only synthetic call nonempty with zero incremental recorded cost; healthy service and reachable webhook | Paid failover mocked; multilingual quality and Hermes key/activation still open |
 
 | 2026-10-31 03:26–03:27 | D2 Telegram test | Text reply received; read-only diagnostic response received; five matching safe-exec read-tier audit entries; no changes requested/performed | Default host/container reasoning still needs improvement; voice and schedules not tested |
+
+## Telegram naming migration — 2026-11-02
+
+- [x] Update active source, installer, settings UI and agent instructions to target names.
+- [x] Preserve dated legacy verification and the original blueprint.
+- [ ] Complete replacement identity verification and private credential entry.
+- [ ] Activate and test both bots and notifications; see TELEGRAM-MIGRATION.md.
+- [ ] Confirm exact obsolete bot list at deletion time, then remove approved bots.
+  - [ ] Preserve @SakirAlertBoxBot and both replacement bots.

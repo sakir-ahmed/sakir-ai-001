@@ -23,7 +23,7 @@ Usage (python3 /opt/sakir-tools/sakir.py <group> <command> ...):
 
   sales summary [--days N]            leads, messages, approvals, spend
   sales leads [text]                  find leads by name/business/phone
-  sales inbox                         drafts waiting in @DTSalesDesk_bot
+  sales inbox                         drafts waiting in @sakir_ai_001_sales_bot
   sales spend                         model spend this month
   sales pause | resume                stop/start automatic customer replies
 

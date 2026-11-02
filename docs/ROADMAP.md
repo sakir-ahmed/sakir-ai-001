@@ -43,7 +43,7 @@ current work; this roadmap retains the original phase history.
 **2026-10-30** — first real install, done together over several rounds. Confirmed from the
 session's own terminal output, not assumed:
 - [x] `sudo bash install.sh` run on the server; hostname `sakir-ai-001` set
-- [x] Hermes running and reachable on Telegram (`@SakirAI_bot`)
+- [x] Hermes running and reachable on legacy Telegram bot (`@SakirAI_bot`); replacement migration pending
 - [x] Backup encryption key generated and saved by Sakir (typed `saved`)
 - [x] Firewall, Docker, all containers up; Nginx serving `ai.datatechbd.com` (not yet reachable —
       DNS, below)
@@ -85,12 +85,12 @@ server (Sakir pasted the output; Claude still cannot SSH in on its own). Confirm
 - [ ] SSH key on laptop; DNS A record for the webhook domain
 - [ ] Start Meta business verification for Datatech BD Ltd. (slowest step — day 1)
 - [ ] Create Meta app, request permissions (README §1)
-- [ ] Create @SakirAI_bot and @DTSalesDesk_bot; note Telegram user ID
+- [ ] Create @sakir_ai_001_bot and @sakir_ai_001_sales_bot; note Telegram user ID
 - [ ] OpenRouter: $40 credit, keys `hermes-core` ($12) and `sales` ($26)
 - [x] Run `sudo bash install.sh` on the server — reported 2026-10-30; health gaps below remain
 - [x] Backup private key saved by Sakir — reported 2026-10-30; storage location not independently verified
 - [ ] Optional: AI coding tools (`--step aitools`); log in to each once (docs/AI-TOOLS.md)
-- [ ] Set @SakirAI_bot display name to "Sakir AI 001" in @BotFather
+- [ ] Set @sakir_ai_001_bot display name to "sakir_ai_001_bot" in @BotFather
 - [ ] Configure rclone remote `sakir-backup`; confirm a backup uploads
 - [ ] First restore test passes
 - [ ] Fill `knowledge/me/` (profile TODOs, voice with 10 real examples, likes-dislikes, goals)

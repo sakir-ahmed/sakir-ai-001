@@ -1,5 +1,8 @@
 # Architecture (as built)
 
+Telegram diagrams use the requested target names. The live cutover remains pending;
+see [Telegram migration](TELEGRAM-MIGRATION.md) for verified status.
+
 This describes the system the code in this repo actually installs. The original
 plan is in [`Sakir AI 001 — Build Blueprint.md`](../Sakir%20AI%20001%20%E2%80%94%20Build%20Blueprint.md);
 where the two differ, this file is correct and [DECISIONS.md](DECISIONS.md) says why.
@@ -17,9 +20,9 @@ agent behavior; it does not prove an autonomous workflow has run successfully.
 ```mermaid
 flowchart TB
     subgraph IN["Inputs"]
-        S["Sakir<br/>Telegram text + voice<br/>@SakirAI_bot"]
+        S["Sakir<br/>Telegram text + voice<br/>@sakir_ai_001_bot"]
         C["Customers<br/>Facebook comments, Messenger,<br/>Instagram DMs"]
-        SD["Sakir approvals<br/>@DTSalesDesk_bot"]
+        SD["Sakir approvals<br/>@sakir_ai_001_sales_bot"]
     end
 
     subgraph EDGE["Host"]
@@ -107,7 +110,7 @@ flowchart TD
     M --> O{"Auto-send allowed?"}
     N --> O
     O -- yes --> P["Send via Graph API<br/>(inside 24-hour window)"]
-    O -- no --> Q["Card in @DTSalesDesk_bot:<br/>Approve · Edit · Reject"]
+    O -- no --> Q["Card in @sakir_ai_001_sales_bot:<br/>Approve · Edit · Reject"]
     Q -- approve / edit --> P
     Q -- reject --> R["Nothing sent"]
 ```

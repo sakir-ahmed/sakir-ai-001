@@ -145,7 +145,7 @@ public_ip() {
 dc() { (cd "$INSTALL_DIR" && docker compose "$@"); }
 
 # ---- Alerts ----------------------------------------------------------------------
-# notify_telegram "text" -> sends a message to Sakir with the @SakirAI_bot token
+# notify_telegram "text" -> sends a message to Sakir with the @sakir_ai_001_bot token
 # stored for safe-exec. Never fails the caller (alerts must not break scripts).
 notify_telegram() {
   local f="${INSTALL_DIR}/secrets/safe-exec.env" token owner

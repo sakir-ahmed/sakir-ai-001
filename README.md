@@ -57,8 +57,8 @@ with `sudo bash /opt/sakir-ai/install.sh --step secrets`.
 | 1 | **SSH key** on your laptop | `ssh-keygen -t ed25519`, then `ssh-copy-id root@<server-ip>` | Safe login; password login is turned off once a key works |
 | 2 | **Domain for webhooks** | DNS A record, e.g. `ai.datatechbd.com` → server IP | HTTPS for Facebook webhooks |
 | 3 | **Your Telegram user ID** | message @userinfobot | Only you can use the bots |
-| 4 | **@SakirAI_bot** token | @BotFather → `/newbot`, display name **Sakir AI 001** | Hermes (your assistant, "Sakir AI 001") |
-| 5 | **@DTSalesDesk_bot** token | @BotFather → `/newbot` | Approving customer replies |
+| 4 | **@sakir_ai_001_bot** token | @BotFather → `/newbot`, display name **sakir_ai_001_bot** | Hermes (your assistant, "Sakir AI 001") |
+| 5 | **@sakir_ai_001_sales_bot** token | @BotFather → `/newbot` | Approving customer replies |
 | 6 | **OpenRouter** account, $40 credit, 2 keys | openrouter.ai → Keys: `hermes-core` (limit $12), `sales` (limit $26) | AI models |
 | 7 | **Meta app** | developers.facebook.com → Business app → add Messenger + Webhooks; business verification of Datatech BD Ltd. | Facebook/Instagram replies and posting |
 | 8 | Meta **App Secret**, **Page ID**, long-lived **Page token** | App settings → Basic; Graph API Explorer | same |
@@ -142,14 +142,14 @@ sudo bash install.sh --step aitools      # add Claude Code / Codex / Grok / Gemi
    **Outside monitor**: if you created the two healthchecks.io checks, run
    `sudo bash /opt/sakir-ai/install.sh --step secrets`, paste both ping URLs, then
    `sudo systemctl start sakir-heartbeat` and see the heartbeat check turn green.
-7. **Hermes schedules** — send @SakirAI_bot:
+7. **Hermes schedules** — send @sakir_ai_001_bot:
    - "Every day at 08:30 run the daily-brief skill (morning)."
    - "Every day at 21:30 run the daily-brief skill (evening)."
    - "Every Monday at 10:00 run career-scout."
    - "Every Tuesday and Friday at 11:00 run linkedin-writer."
    - "Every Sunday at 09:00 run learning-coach."
 8. **Uptime Kuma** (`https://<tailnet-name>:3444` or SSH tunnel): create the admin
-   account, add a Telegram notification (@SakirAI_bot token + your ID), and add
+   account, add a Telegram notification (@sakir_ai_001_bot token + your ID), and add
    monitors: each DT site, `https://<domain>/meta/webhook` (keyword: none; expect 403
    is fine), certificate expiry.
 9. **Grafana** (`https://<tailnet-name>:3443`): log in as `admin` with
@@ -160,9 +160,9 @@ sudo bash install.sh --step aitools      # add Claude Code / Codex / Grok / Gemi
    diagram, container health, leads, approvals waiting, spend, last backup); `/settings`
    changes tokens, budget, retention and autonomy from a browser — see docs/OPERATIONS.md.
 10. **Test the sales flow**: from a personal Facebook account (added as a tester),
-    message the Page "dam koto?" → a draft card appears in @DTSalesDesk_bot within a
+    message the Page "dam koto?" → a draft card appears in @sakir_ai_001_sales_bot within a
     minute → tap Approve → the reply arrives in Messenger.
-11. **Test approvals**: tell @SakirAI_bot "reboot the server" → it explains → you agree
+11. **Test approvals**: tell @sakir_ai_001_bot "reboot the server" → it explains → you agree
     → a code arrives → send `confirm <id> <code>` (only after a backup exists).
 
 No Tailscale? Use an SSH tunnel from your laptop:
@@ -176,8 +176,8 @@ then open http://localhost:5678 (n8n), :3000 (Grafana), :3001 (Uptime Kuma), :80
 ### Telegram
 | Bot | You use it for |
 | --- | --- |
-| **@SakirAI_bot** (Hermes) | briefs, questions, voice notes, content packs, jobs, LinkedIn, server checks, `confirm <id> <code>` |
-| **@DTSalesDesk_bot** | Approve / Edit / Reject customer replies; `/inbox`, `/stats`, `/lead`, `/pause`, `/resume` |
+| **@sakir_ai_001_bot** (Hermes) | briefs, questions, voice notes, content packs, jobs, LinkedIn, server checks, `confirm <id> <code>` |
+| **@sakir_ai_001_sales_bot** | Approve / Edit / Reject customer replies; `/inbox`, `/stats`, `/lead`, `/pause`, `/resume` |
 
 ### Server command
 ```
@@ -226,8 +226,8 @@ then `sakir-ai restart dt-assistant`.
 
 | Service | What it does | Reached at |
 | --- | --- | --- |
-| hermes | your assistant, skills, memory | Telegram @SakirAI_bot |
-| dt-assistant | sales replies, approvals bot, publisher, internal API | `https://<domain>/meta/webhook`; Telegram @DTSalesDesk_bot |
+| hermes | your assistant, skills, memory | Telegram @sakir_ai_001_bot |
+| dt-assistant | sales replies, approvals bot, publisher, internal API | `https://<domain>/meta/webhook`; Telegram @sakir_ai_001_sales_bot |
 | ai-db | leads, messages, approvals, calendar, spend | internal |
 | safe-exec | allowlisted server actions + approval codes | internal |
 | stt / tts | Bangla/English speech, embeddings / voice replies | internal |

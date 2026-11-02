@@ -5,6 +5,17 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-019 · Consistent Telegram bot usernames
+**Date:** 2026-11-02
+**Context:** Sakir requested underscore-separated bot names and removal of other
+owned bots, retaining @SakirAlertBoxBot.
+**Decision:** Target @sakir_ai_001_bot for Hermes and @sakir_ai_001_sales_bot for
+sales approvals. Preserve separate polling identities and customer-facing branding.
+**Consequence:** Active source references use the targets; dated evidence below
+retains legacy names. Creation, credential cutover, live testing and permanent
+bot deletion are separate gates in [TELEGRAM-MIGRATION.md](TELEGRAM-MIGRATION.md).
+The source rename alone does not change the running bot identities.
+
 ## D-018 · Free-first model routing with explicit paid exceptions
 **Date:** 2026-10-31
 **Context:** Sakir requested minimizing AI/API cost and automatic switching when

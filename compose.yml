@@ -34,7 +34,7 @@ x-common: &common
 
 services:
   # ---------------------------------------------------------------------------
-  # Hermes Agent: Sakir's private assistant on Telegram (@SakirAI_bot)
+  # Hermes Agent: Sakir's private assistant on Telegram (@sakir_ai_001_bot)
   # State (config.yaml, .env, skills, memory, sessions) lives in data/hermes.
   # ---------------------------------------------------------------------------
   hermes:
@@ -65,7 +65,7 @@ services:
 
   # ---------------------------------------------------------------------------
   # dt-assistant: Facebook/Instagram sales pipeline, approval bot
-  # (@DTSalesDesk_bot), content publisher, lead follow-ups, internal API.
+  # (@sakir_ai_001_sales_bot), content publisher, lead follow-ups, internal API.
   # ---------------------------------------------------------------------------
   dt-assistant:
     <<: *common

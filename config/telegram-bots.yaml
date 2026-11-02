@@ -1,0 +1,10 @@
+# Telegram naming targets; credentials stay in the private runtime environment.
+# These names describe the requested migration, not verified live connections.
+main:
+  username: sakir_ai_001_bot
+  display_name: sakir_ai_001_bot
+sales:
+  username: sakir_ai_001_sales_bot
+  display_name: sakir_ai_001_sales_bot
+protected:
+  - SakirAlertBoxBot
