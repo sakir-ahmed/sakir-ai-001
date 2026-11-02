@@ -171,3 +171,16 @@ or external publishing merely by checking a documentation task.
 - [ ] Activate and test both bots and notifications; see TELEGRAM-MIGRATION.md.
 - [ ] Confirm exact obsolete bot list at deletion time, then remove approved bots.
   - [ ] Preserve @SakirAlertBoxBot and both replacement bots.
+
+## Private web interface — 2026-11-02
+
+- [x] Inventory live model (`qwen2.5:1.5b`), capacity and NGINX sites.
+- [x] Commit reusable optional deployment, private onboarding and gated proxy scripts.
+- [x] Complete encrypted backup and install official Open WebUI v0.12.5.
+- [x] Verify UI page HTTP 200, healthy API and loopback-only listener.
+- [x] Confirm existing ai001.sakir.bd NGINX hostname/certificate paths and syntax.
+- [ ] Owner completes private administrator prompt in Termius.
+- [ ] Verify further signup disabled; publish existing domain and test HTTPS login.
+- [ ] Verify Ollama discovery and authenticated chat from UI.
+- [ ] Owner optionally configures other providers privately; default remains local.
+- [ ] Bengali voice and visible Hermes task execution acceptance (not supplied by UI installation).
