@@ -64,3 +64,25 @@ References: [official installation guide](https://docs.openwebui.com/getting-sta
   model load 4.22 s, prompt evaluation 15.17 s (2,050 tokens), generation 1.22 s
   (17 tokens, 13.99 tokens/s). This was a completed CPU request, not a stalled proxy.
 - Voice quality, other-provider credentials and automatic escalation remain unverified.
+
+## Speed tuning — 2026-11-02
+
+Saved in Admin → Interface: Title Generation off, Follow Up Generation off,
+Tags Generation off. Autocomplete was already off; voice instructions and model
+weights were preserved. New-install defaults in `compose.webui.yml` match these
+choices. Existing UI configuration persists in its database; environment changes
+alone do not overwrite existing administrator settings.
+
+A second independent UI greeting completed without generated title/follow-ups.
+Its timing was 23.90 s total, 2.59 s load, 17.80 s prompt processing (2,050 tokens),
+and 3.28 s generation (32 tokens, 9.77 tokens/s). Baseline was 23.68 s with 17
+output tokens. This is **not evidence of faster primary responses**; output
+length and CPU conditions differ, and both requests incurred model loading.
+A warm-only controlled comparison was not completed.
+
+Live runtime inspection showed 12 CPUs, a 1.2 GB resident model, CPU-only
+inference and a 4,096-token context. WebUI used about 833 MiB of its 3 GiB cap.
+Default built-in tools can add prompt overhead; removing their instructions
+from a chat-only model and extending keep-alive are candidates, not applied
+changes. The owner reclaimed desktop control before further tuning; no model
+variant, context reduction, service restart or additional provider was activated.

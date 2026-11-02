@@ -187,3 +187,14 @@ or external publishing merely by checking a documentation task.
   - [ ] Measure warm-response latency and review optional background inference tasks.
 - [ ] Owner optionally configures other providers privately; default remains local.
 - [ ] Bengali voice and visible Hermes task execution acceptance (not supplied by UI installation).
+
+### WebUI speed tuning
+
+- [x] Measure baseline and comparison through actual authenticated chat.
+- [x] Save title/follow-up/tag generation off; verify comparison completes without them.
+- [x] Commit matching new-install defaults.
+- [x] Report no measured primary speed improvement: 23.68 s → 23.90 s.
+- [ ] Controlled warm comparison with fixed output length.
+- [ ] Review built-in tool context and keep-alive tradeoffs, then measure again.
+- [ ] Apply further tuning only when desktop control is authorized again or an
+  existing authorized background server connection is available.

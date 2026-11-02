@@ -16,6 +16,10 @@ services:
       WEBUI_AUTH: "true"
       ENABLE_SIGNUP: "true"
       DEFAULT_MODELS: qwen2.5:1.5b
+      # Avoid three extra local inference jobs after ordinary chat replies.
+      ENABLE_TITLE_GENERATION: "false"
+      ENABLE_FOLLOW_UP_GENERATION: "false"
+      ENABLE_TAGS_GENERATION: "false"
       WEBUI_SECRET_KEY_FILE: /app/backend/data/.webui_secret_key
       DO_NOT_TRACK: "true"
       SCARF_NO_ANALYTICS: "true"
