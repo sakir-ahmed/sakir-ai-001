@@ -35,8 +35,8 @@ Existing sales routing and Hermes remain independent and unchanged.
 ## Remaining work
 
 - [ ] Deploy and verify UI health and local model discovery.
-- [ ] Owner creates administrator; disable subsequent signups.
-- [ ] Authenticated HTTPS access through NGINX.
+- [x] Owner creates administrator; disable subsequent signups.
+- [x] HTTPS login page published through NGINX; authenticated chat acceptance remains pending.
 - [ ] Bengali text quality and CPU latency acceptance.
 - [ ] Repair existing STT before connecting Bengali voice input.
 - [ ] Test existing TTS and browser microphone consent.
@@ -54,5 +54,9 @@ References: [official installation guide](https://docs.openwebui.com/getting-sta
 - Listener verified on `127.0.0.1:8082` only.
 - Live NGINX `server_name ai001.sakir.bd` and certificate paths confirmed;
   `nginx -t` passed. Existing webhook/media routes remain unchanged.
-- Owner account prompt prepared in Termius; public proxy and authenticated chat
-  remain pending. These checks do not establish model response or voice quality.
+- Owner created administrator privately in Termius. Public `/api/config` confirms
+  onboarding false, auth true and signup false; unauthenticated model requests return 401.
+- NGINX root now proxies to Open WebUI with WebSocket support. Public root and
+  all linked application assets returned HTTP 200 with appropriate content types;
+  invalid-token Meta webhook still returned 403. User reported seeing the login form.
+- Authenticated model response and voice quality remain unverified.

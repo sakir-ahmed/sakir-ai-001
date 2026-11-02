@@ -179,8 +179,9 @@ or external publishing merely by checking a documentation task.
 - [x] Complete encrypted backup and install official Open WebUI v0.12.5.
 - [x] Verify UI page HTTP 200, healthy API and loopback-only listener.
 - [x] Confirm existing ai001.sakir.bd NGINX hostname/certificate paths and syntax.
-- [ ] Owner completes private administrator prompt in Termius.
-- [ ] Verify further signup disabled; publish existing domain and test HTTPS login.
+- [x] Owner completes private administrator prompt in Termius.
+- [x] Verify signup disabled; publish existing domain; verify HTTPS page/assets and protected model API.
+- [ ] Complete authenticated browser login and chat acceptance.
 - [ ] Verify Ollama discovery and authenticated chat from UI.
 - [ ] Owner optionally configures other providers privately; default remains local.
 - [ ] Bengali voice and visible Hermes task execution acceptance (not supplied by UI installation).
