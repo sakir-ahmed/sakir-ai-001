@@ -1,0 +1,29 @@
+# Optional private chat interface using the existing host Ollama instance.
+# Host networking reaches loopback Ollama without exposing its API or changing it.
+services:
+  webui:
+    image: ghcr.io/open-webui/open-webui:v0.12.5
+    container_name: sakir_ai_001_webui
+    network_mode: host
+    restart: unless-stopped
+    cpus: 2
+    mem_limit: 3g
+    environment:
+      HOST: 127.0.0.1
+      PORT: "8082"
+      OLLAMA_BASE_URL: http://127.0.0.1:11434
+      ENABLE_OPENAI_API: "false"
+      WEBUI_AUTH: "true"
+      ENABLE_SIGNUP: "true"
+      DEFAULT_MODELS: qwen2.5:1.5b
+      WEBUI_SECRET_KEY_FILE: /app/backend/data/.webui_secret_key
+      DO_NOT_TRACK: "true"
+      SCARF_NO_ANALYTICS: "true"
+      ANONYMIZED_TELEMETRY: "false"
+    volumes:
+      - /opt/sakir-ai/data/webui:/app/backend/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

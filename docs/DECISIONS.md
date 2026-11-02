@@ -5,6 +5,16 @@ a choice changes how the system works. Format: context, decision, consequence.
 
 ---
 
+## D-020 · Optional private Ollama chat interface
+**Date:** 2026-11-02
+**Context:** Sakir requested an accessible free interface using existing local AI.
+**Decision:** Add Open WebUI as an independent optional service, official pinned
+release, host loopback only, connected to existing Ollama. Disable cloud API
+connections in this interface. Keep production services unchanged.
+**Consequence:** Owner onboarding precedes public NGINX routing. Bengali voice,
+Hermes progress and complex-task escalation remain separate delivery gates in
+[WEBUI.md](WEBUI.md); installing the interface does not complete those features.
+
 ## D-019 · Consistent Telegram bot usernames
 **Date:** 2026-11-02
 **Context:** Sakir requested underscore-separated bot names and removal of other
